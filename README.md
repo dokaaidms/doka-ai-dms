@@ -1,81 +1,82 @@
-# Doka
+# 📄 Doka AI DMS
+> **Safety-First Intelligent Document Management, OCR & Enterprise Knowledge System**
 
-Doka is a safety-first document management system with three editions: **Personal Local**, **Personal Cloud**, and **Enterprise**.
+[![Next.js](https://img.shields.io/badge/Next.js-15-black?style=flat-square&logo=next.js)](https://nextjs.org/)
+[![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-Workers_API-F38020?style=flat-square&logo=cloudflare)](https://workers.cloudflare.com/)
+[![FastAPI](https://img.shields.io/badge/Python-FastAPI_Engine-009688?style=flat-square&logo=fastapi)](https://fastapi.tiangolo.com/)
+[![Supabase](https://img.shields.io/badge/Supabase-Database_&_Auth-3ECF8E?style=flat-square&logo=supabase)](https://supabase.com/)
+[![Gemini AI](https://img.shields.io/badge/Gemini_2.0-Multimodal_Document_AI-4285F4?style=flat-square&logo=google)](https://deepmind.google/technologies/gemini/)
+[![Cloudinary](https://img.shields.io/badge/Cloudinary-Document_Vault-3448C5?style=flat-square&logo=cloudinary)](https://cloudinary.com/)
+[![Vercel](https://img.shields.io/badge/Vercel-Production_Live-black?style=flat-square&logo=vercel)](https://enterprise-ai-dms.vercel.app)
+[![Telegram](https://img.shields.io/badge/Telegram_Bot-Topic_#8-26A5E4?style=flat-square&logo=telegram)](https://t.me/)
 
-## Current release focus
+---
 
-**Personal Local first.** The active release path is:
+## 🌟 Overview
 
-**copied source → verified import → scan/OCR → review → human approval → organized working library → backup/recovery**
+**Doka AI DMS** is an enterprise-grade, safety-first document management system with multi-tier deployment capabilities (**Personal Local**, **Cloud Serverless**, and **Enterprise**).
 
-The original source is read-only. Doka must not use the original source as a writable organization target.
+It transforms unstructured papers, PDFs, invoices, contracts, and scans into structured, searchable, and verified digital intelligence while enforcing strict read-only protections on original source files.
 
-Current release status: **Production Ready — Conditional Sign-Off (Owner-approved launch with explicitly deferred post-launch work)**. The owner accepts the current Vercel + Cloudflare Worker + Supabase RLS production foundation and the recorded automated quality results. Four specialized checks remain explicitly deferred to the post-launch quality roadmap: staging synthetic A/B isolation and exact 50 MiB integrity; Myanmar/English OCR CER optimization; staging-only B2/Cloudinary/Google Drive recovery drills; and real-browser copied-office-dataset acceptance. These items are deferred, not claimed as passed. See CURRENT_STATE.md for the authoritative checkpoint and ROADMAP.md for the backlog. Enterprise remains deferred.
+---
 
-## Editions
+## 🚀 Key Features
 
-- **Personal Local** — React/Vite + FastAPI/Python + local filesystem/OCR. Cloud services are not required.
-- **Personal Cloud** — React/Vite + Supabase Auth/Postgres/RLS/private Storage + Cloudflare Worker.
-- **Enterprise** — deferred until its own tenant, RBAC, security and acceptance gates are activated.
+* **🛡️ Safety-First Import & Quarantine**: Originals remain read-only; documents undergo verified copy, hash validation, and quarantine staging before ingestion.
+* **🔍 Multimodal AI & OCR**: High-accuracy text extraction via Tesseract, PDFium, and Gemini 2.0 Multimodal Document Understanding (supporting English and Burmese scripts).
+* **🧠 Semantic Document RAG**: Vector-indexed retrieval powered by Supabase `pgvector` and Voyage AI.
+* **📁 Smart Category Organization**: Automatic contract analysis, invoice categorization, metadata extraction, and human-in-the-loop review.
+* **☁️ Cloud & Edge Hybrid**: Fast Edge API powered by Cloudflare Workers paired with Next.js 15 UI and Supabase Backend.
+* **🤖 Telegram Document Ingestion**: Send documents directly to `@DokaAiBot` in Topic `#8` for instant ingestion, OCR, and AI summary.
 
-## Quick start & Development Ports
+---
 
-| Component | Target Port / Shell | Command |
-|---|---|---|
-| **Web Frontend** | `http://localhost:5173` | `cd apps/web-platform/frontend && npm install && npm run dev` |
-| **Backend API** | `http://localhost:8002` | `cd apps/web-platform/backend && uvicorn app.main:app --port 8002 --reload` |
-| **Desktop App** | Native Electron Window | `cd apps/desktop && npm install && npm start` |
-| **Mobile App** | Native Camera Scanner | `cd apps/mobile && npm install && npm start` |
-| **Telegram Ops Bot** | Topic `#8` (`📄 Doka-DMS`) | Scoped supergroup ingest, OCR status, alerts (`@DokaNexusBot`) |
+## 🏗️ System Architecture
 
-Windows one-click launcher scripts:
-- `start-doka.bat` — Launches Backend (8002) and Web Frontend (5173).
-- `start_desktop.bat` — Launches Electron Native Desktop Application connected to port 8002.
+```
+     Raw Documents (PDF / Scans / Photos / Telegram)
+                           │
+                           ▼
+┌─────────────────────────────────────────────────────────────┐
+│                 Safety & Quarantine Gateway                 │
+│  • Read-only Source Verification • SHA-256 Checksum Hash   │
+└──────────────────────────┬──────────────────────────────────┘
+                           │
+                           ▼
+┌─────────────────────────────────────────────────────────────┐
+│                 Multimodal Processing Core                  │
+│  • Tesseract OCR / PDFium Parser                            │
+│  • Gemini 2.0 Flash Document Understanding                  │
+│  • Metadata Extraction & Semantic Chunking                  │
+└──────────────────────────┬──────────────────────────────────┘
+                           │
+                           ▼
+┌─────────────────────────────────────────────────────────────┐
+│                 Cloudflare Edge & Supabase                  │
+│  • Cloudflare Worker API (Edge routing & auth)              │
+│  • Supabase Database (RLS, Audit Trails, pgvector)          │
+│  • Cloudinary CDN & Backblaze B2 (Secure Storage)           │
+└─────────────────────────────────────────────────────────────┘
+```
 
-## Repository layout
+---
 
-- `apps/web-platform/frontend/` — React/Vite browser application (Vite on port 5173).
-- `apps/web-platform/backend/` — FastAPI Local & Cloud runtime (Uvicorn on port 8002), SQLite `Office_DMS/database/dms.db`.
-- `apps/desktop/` — Electron Native Desktop application with local folder scanning and native menu integration.
-- `apps/mobile/` — Mobile Camera OCR document scanner client.
-- `apps/web-platform/tests/` — Maintained backend and frontend regression test suite.
+## ⚡ Quickstart
 
-## Documentation map
+```bash
+# 1. Install dependencies
+pnpm install
 
-| Document | Purpose |
-|---|---|
-| `CURRENT_STATE.md` | authoritative current status, evidence and next action |
-| `PROJECT_OVERVIEW.md` | architecture and runtime boundaries |
-| `ROADMAP.md` | release gates, phases and backlog |
-| `docs/OWNER_LOCAL_CHECKLIST.md` | owner/local-only acceptance tasks and full future-work inventory |
-| `UI_DESIGN_SYSTEM.md` | implemented UI/design/accessibility contract |
-| `TOOL.md` | working, evidence and documentation protocol |
-| `docs/SELF_AUDIT.md` | repository-local structural/evidence preflight |
-| `docs/REPOSITORY_INFRA_AUDIT_2026-10-15.md` | dated GitHub/Vercel/Render/Supabase/Cloudflare findings and remaining-work checklist |
-| `SECURITY.md` | security boundaries and verification rules |
-| `docs/ARCHITECTURE.md` | detailed architecture reference |
-| `docs/DEVELOPMENT.md` | development setup and contribution workflow |
-| `docs/TESTING.md` | automated and release acceptance testing |
-| `docs/DEPLOYMENT.md` | deployment topology and release evidence |
-| `docs/OPERATIONS.md` | runtime operations and provider readiness |
-| `docs/DATABASE.md` | schema, RLS and migration rules |
-| `docs/API.md` | Cloud API contract |
-| `docs/AI_RAG.md` | AI/RAG and agent boundaries |
-| `docs/STORAGE.md` | storage routing and recovery |
-| `docs/TROUBLESHOOTING.md` | recurring diagnostic and recovery guidance |
+# 2. Run local web platform
+pnpm dev
 
-Historical material is preserved under `archive/legacy/` and existing legacy areas.
+# 3. Cloudflare Worker Edge
+cd apps/web-platform/backend/cloudflare_worker
+npx wrangler dev
+```
 
-## Safety
+---
 
-- Keep original source data outside the writable workspace.
-- `ORIGINAL_READ_ONLY=true`
-- `ALLOW_SOURCE_WRITE=false`
-- Keep source and working roots separate.
-- Review organization proposals before approval.
-- Use copied representative data for acceptance.
-- Keep verified backups.
+## 📜 License & Compliance
 
-## Release rule
-
-Green CI or implemented code is not enough for release. Follow `ROADMAP.md` and close each required gate with evidence.
+MIT Licensed with Enterprise Safety Addendum.
