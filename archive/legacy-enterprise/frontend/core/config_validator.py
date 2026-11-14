@@ -1,2 +1,0 @@
-class ConfigValidator:
-    pass

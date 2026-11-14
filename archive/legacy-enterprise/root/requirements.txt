@@ -1,4 +1,0 @@
-# Legacy Enterprise Edition dependency set.
-# Personal Local Edition uses dms/requirements-local.txt.
-
--r apps/web-platform/backend/requirements-dev.txt
