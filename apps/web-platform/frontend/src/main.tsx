@@ -5,8 +5,14 @@ import { ThemeProvider } from './contexts/ThemeContext'
 import './index.css'
 import App from './App.tsx'
 import { initSentry } from './lib/sentry'
+import { inject as injectAnalytics } from '@vercel/analytics'
+import { injectSpeedInsights } from '@vercel/speed-insights'
 
 initSentry()
+
+// Vercel Analytics + Speed Insights
+injectAnalytics()
+injectSpeedInsights()
 
 // Register Service Worker for PWA
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
