@@ -61,7 +61,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v4
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
@@ -71,7 +71,7 @@ jobs:
         run: python scripts/audit/doka_self_audit.py --output "$RUNNER_TEMP/doka-self-audit.json"
       - name: Upload self-audit report
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         with:
           name: doka-self-audit-report
           path: ${{ runner.temp }}/doka-self-audit.json
@@ -83,7 +83,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Scan full Git history for committed secrets
@@ -97,7 +97,7 @@ jobs:
             git --log-opts="--all" --redact --report-format sarif --report-path /report/gitleaks.sarif --no-banner --exit-code 1 /repo
       - name: Upload redacted secret scan findings
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         with:
           name: gitleaks-redacted-report
           path: ${{ runner.temp }}/gitleaks.sarif
@@ -157,7 +157,7 @@ jobs:
           PY
       - name: Upload backend dependency audit reports
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         with:
           name: backend-dependency-audit
           path: |
@@ -180,7 +180,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v4
       - uses: actions/setup-python@v6
         with:
           python-version: "3.13"
@@ -245,7 +245,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v4
       - name: Validate required quality configuration
         run: |
           set -euo pipefail
@@ -267,7 +267,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v4
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
@@ -296,7 +296,7 @@ jobs:
         run: python ../../../scripts/export_cloud_openapi.py artifacts/cloud-openapi.json
       - name: Upload backend coverage and OpenAPI artifacts
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         with:
           name: backend-coverage-and-openapi
           path: |
@@ -310,7 +310,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v4
       - uses: actions/setup-python@v6
         with:
           python-version: "3.13"
@@ -363,7 +363,7 @@ jobs:
     name: Symlink security tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v4
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
@@ -379,8 +379,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: "24"
           cache: npm
@@ -428,7 +428,7 @@ jobs:
         run: npm test
       - name: Upload dependency and lint reports
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         with:
           name: frontend-security-remediation-candidate
           path: |
@@ -450,14 +450,14 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v4
       - name: Run Semgrep baseline scan
         continue-on-error: true
         run: |
           pipx run semgrep scan --config auto --sarif --output semgrep.sarif .
       - name: Upload Semgrep baseline
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         with:
           name: semgrep-baseline
           path: semgrep.sarif
@@ -478,8 +478,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: "24"
       - name: Install pinned desktop dependencies
