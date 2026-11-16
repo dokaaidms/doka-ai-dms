@@ -11,19 +11,19 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 function readSavedTheme(): Theme {
-  if (typeof window === 'undefined') return 'system';
+  if (typeof window === 'undefined') return 'dark';
 
   try {
     const saved = window.localStorage.getItem('theme');
-    return saved === 'light' || saved === 'dark' || saved === 'system' ? saved : 'system';
+    return saved === 'light' || saved === 'dark' || saved === 'system' ? saved : 'dark';
   } catch {
-    return 'system';
+    return 'dark';
   }
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(readSavedTheme);
-  const [effectiveTheme, setEffectiveTheme] = useState<'light' | 'dark'>('light');
+  const [effectiveTheme, setEffectiveTheme] = useState<'light' | 'dark'>('dark');
 
   const setTheme = useCallback((nextTheme: Theme) => {
     setThemeState(nextTheme);

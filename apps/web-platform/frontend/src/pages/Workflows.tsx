@@ -1,558 +1,584 @@
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   Play,
-  Square,
-  Plus,
-  Save,
-  Trash2,
-  Settings2,
+  RotateCcw,
+  CheckCircle2,
+  AlertCircle,
   FileText,
   ScanText,
   ShieldCheck,
-  Cloud,
   Sparkles,
-  X,
-  Activity,
+  Layers,
+  Send,
+  Database,
+  Cloud,
+  ChevronRight,
+  Terminal,
+  Trash2,
   Sliders,
+  Cpu,
+  Info,
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
+import { Card, CardContent } from '@/components/ui/card';
 
-export interface WorkflowNode {
+export interface StaticStage {
   id: string;
+  stageNumber: number;
   title: string;
-  category: 'trigger' | 'ocr' | 'ai' | 'approval' | 'storage';
-  type: string;
-  x: number;
-  y: number;
-  status: 'idle' | 'running' | 'success' | 'error';
-  config: Record<string, unknown>;
-  icon: string;
+  subtitle: string;
+  category: 'Ingestion' | 'OCR' | 'Security' | 'AI Parse' | 'Embedding' | 'Approval' | 'Search' | 'Storage';
+  enabled: boolean;
+  estimatedLatency: string;
+  icon: React.ElementType;
+  description: string;
+  specs: {
+    engine: string;
+    throughput: string;
+    compliance: string;
+  };
 }
 
-export interface WorkflowConnection {
-  id: string;
-  from: string;
-  to: string;
-}
-
-const INITIAL_NODES: WorkflowNode[] = [
+const DEFAULT_STAGES: StaticStage[] = [
   {
-    id: 'doka-trigger',
-    title: 'Inbound Document Watcher',
-    category: 'trigger',
-    type: 'Dropzone & S3 Webhook',
-    x: 60,
-    y: 140,
-    status: 'idle',
-    config: {
-      acceptedFormats: ['PDF', 'TIFF', 'PNG', 'JPEG'],
-      maxFileSize: '50MB',
-      pollInterval: 'Realtime WebSocket',
+    id: 'doka-stage-1',
+    stageNumber: 1,
+    title: 'Document Ingestion',
+    subtitle: 'Multi-Format Inbound Watcher',
+    category: 'Ingestion',
+    enabled: true,
+    estimatedLatency: '120 ms',
+    icon: FileText,
+    description: 'Watches drag-and-drop dropzones and S3 inbound buckets. Handles PDF, DOCX, TIFF, and camera scan uploads.',
+    specs: {
+      engine: 'Direct S3 / Local Buffer',
+      throughput: '100 MB / batch',
+      compliance: 'Zero Local Leakage',
     },
-    icon: 'FileText',
   },
   {
-    id: 'doka-ocr',
-    title: 'Tesseract Neural OCR',
-    category: 'ocr',
-    type: 'Bilingual OCR Engine',
-    x: 420,
-    y: 140,
-    status: 'idle',
-    config: {
-      languages: ['my_MM (Burmese)', 'eng (English)'],
-      dpiUpscaling: true,
-      tableDetection: 'Enabled',
+    id: 'doka-stage-2',
+    stageNumber: 2,
+    title: 'Neural OCR Engine',
+    subtitle: 'Bilingual Myanmar & English',
+    category: 'OCR',
+    enabled: true,
+    estimatedLatency: '340 ms',
+    icon: ScanText,
+    description: 'High-precision OCR with Poppler & Tesseract. Specialized font detection for Myanmar Unicode, Zawgyi, and English.',
+    specs: {
+      engine: 'Tesseract 5.3 + Poppler',
+      throughput: '45 pages / min',
+      compliance: 'DPI Auto-Normalization',
     },
-    icon: 'ScanText',
   },
   {
-    id: 'doka-ai-extract',
-    title: 'Gemini 2.5 Entity Parser',
-    category: 'ai',
-    type: 'Structured Data Extractor',
-    x: 780,
-    y: 70,
-    status: 'idle',
-    config: {
-      model: 'gemini-2.5-pro',
-      fields: ['Vendor', 'TaxID', 'InvoiceDate', 'LineItems', 'TotalAmount'],
-      confidenceThreshold: 0.92,
+    id: 'doka-stage-3',
+    stageNumber: 3,
+    title: 'PII & Redaction Masker',
+    subtitle: 'AES-256 GCM Compliance Gate',
+    category: 'Security',
+    enabled: true,
+    estimatedLatency: '180 ms',
+    icon: ShieldCheck,
+    description: 'Automatically scans and redacts National Registration Card (NRC) numbers, bank accounts, and phone numbers.',
+    specs: {
+      engine: 'AES-GCM 256-bit Tokenizer',
+      throughput: 'Realtime Streaming',
+      compliance: 'GDPR / Enterprise Ready',
     },
-    icon: 'Sparkles',
   },
   {
-    id: 'doka-pii-mask',
-    title: 'PII & Security Masker',
-    category: 'approval',
-    type: 'GDPR / Compliance Filter',
-    x: 780,
-    y: 290,
-    status: 'idle',
-    config: {
-      redactNRC: true,
-      redactCreditCards: true,
-      encryption: 'AES-GCM 256-bit',
+    id: 'doka-stage-4',
+    stageNumber: 4,
+    title: 'Gemini Entity Parser',
+    subtitle: 'Structured Schema Extraction',
+    category: 'AI Parse',
+    enabled: true,
+    estimatedLatency: '420 ms',
+    icon: Sparkles,
+    description: 'Gemini 2.5 multimodal intelligence extracts structured invoice fields, tax identifiers, dates, and line items.',
+    specs: {
+      engine: 'Gemini 2.5 Flash / Pro',
+      throughput: '1M Token Context',
+      compliance: 'JSON Schema Enforced',
     },
-    icon: 'ShieldCheck',
   },
   {
-    id: 'doka-telegram-gate',
+    id: 'doka-stage-5',
+    stageNumber: 5,
+    title: 'Vector Embedding Engine',
+    subtitle: '1024-dim Semantic Vectors',
+    category: 'Embedding',
+    enabled: true,
+    estimatedLatency: '260 ms',
+    icon: Layers,
+    description: 'Generates high-dimensional dense vector embeddings for deep semantic search across unstructured documentation.',
+    specs: {
+      engine: 'Voyage AI voyage-3',
+      throughput: '1024 Dimensions',
+      compliance: 'Normalized Cosine Dot',
+    },
+  },
+  {
+    id: 'doka-stage-6',
+    stageNumber: 6,
     title: 'Telegram Approval Gate',
-    category: 'approval',
-    type: 'Human-in-the-Loop Bot',
-    x: 1140,
-    y: 140,
-    status: 'idle',
-    config: {
-      targetTopic: '#Doka-Approval-Channel',
-      autoApproveAboveConfidence: 0.95,
-      notificationType: 'Interactive Inline Keyboard',
+    subtitle: 'Human-in-the-Loop Audit',
+    category: 'Approval',
+    enabled: false, // Default bypassed
+    estimatedLatency: 'Bypassed',
+    icon: Send,
+    description: 'Optional manual verification gate. Sends interactive callback buttons to approved Telegram channels for critical approvals.',
+    specs: {
+      engine: 'Telegram Bot API / Topic 6',
+      throughput: 'Instant Push Alert',
+      compliance: '2-Factor Digital Signoff',
     },
-    icon: 'Send',
   },
   {
-    id: 'doka-cloud-vault',
-    title: 'Encrypted Cloud Archive',
-    category: 'storage',
-    type: 'Cloud Vault & Audit Log',
-    x: 1480,
-    y: 140,
-    status: 'idle',
-    config: {
-      destination: 'Supabase Encrypted Storage',
-      immutabilityLock: 'WORM (Write Once, Read Many)',
-      retentionPolicy: '7 Years Compliance',
+    id: 'doka-stage-7',
+    stageNumber: 7,
+    title: 'Hybrid Search Index',
+    subtitle: 'PostgreSQL + Qdrant Cloud',
+    category: 'Search',
+    enabled: true,
+    estimatedLatency: '190 ms',
+    icon: Database,
+    description: 'Combines full-text inverted indexes with vector similarity for sub-second retrieval across millions of records.',
+    specs: {
+      engine: 'pgvector + Qdrant Cloud',
+      throughput: '< 15 ms Query Latency',
+      compliance: 'HNSW Graph Indexing',
     },
-    icon: 'Cloud',
+  },
+  {
+    id: 'doka-stage-8',
+    stageNumber: 8,
+    title: 'Encrypted Cloud Vault',
+    subtitle: 'Backblaze B2 & WORM Archive',
+    category: 'Storage',
+    enabled: true,
+    estimatedLatency: '310 ms',
+    icon: Cloud,
+    description: 'Immutable long-term storage with tamper-proof SHA-256 checksums and automated Backblaze B2 replication.',
+    specs: {
+      engine: 'Backblaze B2 + Supabase',
+      throughput: 'Unlimited Cold Storage',
+      compliance: '7-Year WORM Immutability',
+    },
   },
 ];
 
-const INITIAL_CONNECTIONS: WorkflowConnection[] = [
-  { id: 'c1', from: 'doka-trigger', to: 'doka-ocr' },
-  { id: 'c2', from: 'doka-ocr', to: 'doka-ai-extract' },
-  { id: 'c3', from: 'doka-ocr', to: 'doka-pii-mask' },
-  { id: 'c4', from: 'doka-ai-extract', to: 'doka-telegram-gate' },
-  { id: 'c5', from: 'doka-pii-mask', to: 'doka-telegram-gate' },
-  { id: 'c6', from: 'doka-telegram-gate', to: 'doka-cloud-vault' },
-];
-
-const AVAILABLE_MODULES = [
-  { title: 'Barcode & QR Code Decoder', category: 'ocr', type: 'ZBar Scanner', icon: 'ScanText', desc: 'Auto-extracts tracking barcodes and digital signatures' },
-  { title: 'Document Deduplicator', category: 'ai', type: 'SHA-256 & Perceptual Hash', icon: 'FileCheck', desc: 'Detects duplicates before saving to storage' },
-  { title: 'PDF Splitter & Merger', category: 'trigger', type: 'Batch Processor', icon: 'Layers', desc: 'Splits multi-page bulk scans into individual vouchers' },
-  { title: 'ERP/Accounting Webhook', category: 'storage', type: 'REST API Dispatcher', icon: 'Send', desc: 'Posts structured invoice JSON to SAP/QuickBooks' },
-] as const;
-
-
-function createWorkflowNodeId(existingIds: string[]): string {
-  const used = new Set(existingIds);
-  let index = 1;
-  while (used.has(`node-${index}`)) index += 1;
-  return `node-${index}`;
+interface LogEntry {
+  id: string;
+  time: string;
+  stageName: string;
+  message: string;
+  type: 'info' | 'success' | 'warn';
 }
 
 export default function WorkflowsPage() {
-  const [nodes, setNodes] = useState<WorkflowNode[]>(INITIAL_NODES);
-  const [connections, setConnections] = useState<WorkflowConnection[]>(INITIAL_CONNECTIONS);
-  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [stages, setStages] = useState<StaticStage[]>(DEFAULT_STAGES);
+  const [selectedStageId, setSelectedStageId] = useState<string>('doka-stage-1');
   const [isRunning, setIsRunning] = useState(false);
-  const [logs, setLogs] = useState<Array<{ timestamp: string; nodeTitle: string; message: string; type: 'info' | 'success' | 'warn' }>>([
-    { timestamp: '09:00:00', nodeTitle: 'DOKA-CORE', message: 'Document automation pipeline ready. Awaiting trigger.', type: 'info' }
+  const [activeRunningId, setActiveRunningId] = useState<string | null>(null);
+  const [completedStageIds, setCompletedStageIds] = useState<string[]>([]);
+  const [logs, setLogs] = useState<LogEntry[]>([
+    {
+      id: 'log-1',
+      time: '09:00:00',
+      stageName: 'DOKA-PIPELINE',
+      message: 'Zero-Code 8-Stage Document Automation Pipeline initialized.',
+      type: 'info',
+    },
+    {
+      id: 'log-2',
+      time: '09:00:01',
+      stageName: 'TELEGRAM GATE',
+      message: 'Stage 6 (Telegram Approval Gate) is set to BYPASS — routing directly to Hybrid Search Index.',
+      type: 'warn',
+    },
   ]);
-  const [showAddDrawer, setShowAddDrawer] = useState(false);
-  const [draggingNodeId, setDraggingNodeId] = useState<string | null>(null);
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
 
-  const canvasRef = useRef<HTMLDivElement>(null);
-  const selectedNode = useMemo(() => nodes.find(n => n.id === selectedNodeId) || null, [nodes, selectedNodeId]);
+  const logEndRef = useRef<HTMLDivElement>(null);
 
-  // Dragging logic
-  const handleMouseDown = (e: React.MouseEvent, id: string) => {
-    e.stopPropagation();
-    setSelectedNodeId(id);
-    const node = nodes.find(n => n.id === id);
-    if (!node) return;
-    setDraggingNodeId(id);
-    setDragOffset({
-      x: e.clientX - node.x,
-      y: e.clientY - node.y,
-    });
+  useEffect(() => {
+    logEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [logs]);
+
+  const selectedStage = stages.find(s => s.id === selectedStageId) || stages[0];
+
+  const handleToggleStage = (id: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setStages(prev =>
+      prev.map(s => {
+        if (s.id !== id) return s;
+        const nextState = !s.enabled;
+        const logMsg: LogEntry = {
+          id: `log-${Date.now()}`,
+          time: new Date().toLocaleTimeString(),
+          stageName: s.title.toUpperCase(),
+          message: nextState
+            ? `Stage activated in pipeline bus.`
+            : `Stage DEACTIVATED — auto-bypass arc enabled.`,
+          type: nextState ? 'info' : 'warn',
+        };
+        setLogs(l => [...l, logMsg]);
+        return {
+          ...s,
+          enabled: nextState,
+          estimatedLatency: nextState ? (s.id === 'doka-stage-6' ? '450 ms' : s.estimatedLatency) : 'Bypassed',
+        };
+      })
+    );
   };
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!draggingNodeId) return;
-    const newX = Math.max(20, Math.min(1900, e.clientX - dragOffset.x));
-    const newY = Math.max(20, Math.min(900, e.clientY - dragOffset.y));
-    setNodes(prev => prev.map(n => n.id === draggingNodeId ? { ...n, x: newX, y: newY } : n));
-  };
-
-  const handleMouseUp = () => {
-    setDraggingNodeId(null);
-  };
-
-  const handleAddModule = (module: typeof AVAILABLE_MODULES[number]) => {
-    const newId = createWorkflowNodeId(nodes.map(node => node.id));
-    const positionIndex = nodes.length;
-    const newNode: WorkflowNode = {
-      id: newId,
-      title: module.title,
-      category: module.category,
-      type: module.type,
-      x: 350 + (positionIndex % 4) * 60,
-      y: 200 + Math.floor(positionIndex / 4) * 80,
-      status: 'idle',
-      config: { note: 'Added via Doka Visual Canvas' },
-      icon: module.icon,
-    };
-    setNodes(prev => [...prev, newNode]);
-    setShowAddDrawer(false);
-    setSelectedNodeId(newId);
+  const handleResetDefaults = () => {
+    setStages(DEFAULT_STAGES);
+    setCompletedStageIds([]);
+    setActiveRunningId(null);
     setLogs(prev => [
-      { timestamp: new Date().toLocaleTimeString(), nodeTitle: module.title, message: 'Node added to pipeline.', type: 'info' },
       ...prev,
+      {
+        id: `log-${Date.now()}`,
+        time: new Date().toLocaleTimeString(),
+        stageName: 'PIPELINE CONFIG',
+        message: 'Pipeline reset to recommended factory configuration.',
+        type: 'info',
+      },
     ]);
   };
 
-  const handleDeleteNode = (id: string) => {
-    setNodes(prev => prev.filter(n => n.id !== id));
-    setConnections(prev => prev.filter(c => c.from !== id && c.to !== id));
-    if (selectedNodeId === id) setSelectedNodeId(null);
-  };
-
-  // Run Workflow Simulation
-  const handleRunWorkflow = async () => {
+  const handleRunSimulation = async () => {
     if (isRunning) return;
     setIsRunning(true);
+    setCompletedStageIds([]);
+    setActiveRunningId(null);
+
+    const activeStages = stages.filter(s => s.enabled);
     setLogs(prev => [
-      { timestamp: new Date().toLocaleTimeString(), nodeTitle: 'ENGINE', message: 'Simulating document intake: "Invoice_2026_0412.pdf"...', type: 'info' },
       ...prev,
+      {
+        id: `log-${Date.now()}`,
+        time: new Date().toLocaleTimeString(),
+        stageName: 'SIMULATOR',
+        message: `Starting automated run for test document "NRC_KYC_Contract_2026.pdf" (${activeStages.length} active stages)...`,
+        type: 'info',
+      },
     ]);
 
-    setNodes(prev => prev.map(n => ({ ...n, status: 'idle' })));
-    const sequence = ['doka-trigger', 'doka-ocr', 'doka-ai-extract', 'doka-pii-mask', 'doka-telegram-gate', 'doka-cloud-vault'];
+    for (let i = 0; i < stages.length; i++) {
+      const stage = stages[i];
+      if (!stage.enabled) {
+        setLogs(prev => [
+          ...prev,
+          {
+            id: `log-${Date.now()}-${i}`,
+            time: new Date().toLocaleTimeString(),
+            stageName: stage.title.toUpperCase(),
+            message: `[BYPASS] Stage ${stage.stageNumber} disabled — auto-routing around node.`,
+            type: 'warn',
+          },
+        ]);
+        continue;
+      }
 
-    for (let i = 0; i < sequence.length; i++) {
-      const currentId = sequence[i];
-      setNodes(prev => prev.map(n => n.id === currentId ? { ...n, status: 'running' } : n));
-      const targetNode = nodes.find(n => n.id === currentId);
-
+      setActiveRunningId(stage.id);
+      setSelectedStageId(stage.id);
       setLogs(prev => [
-        { timestamp: new Date().toLocaleTimeString(), nodeTitle: targetNode?.title || currentId, message: `Processing stage [${i + 1}/${sequence.length}]...`, type: 'info' },
         ...prev,
+        {
+          id: `log-${Date.now()}-${i}`,
+          time: new Date().toLocaleTimeString(),
+          stageName: stage.title.toUpperCase(),
+          message: `Executing stage [${stage.stageNumber}/8]: ${stage.subtitle}...`,
+          type: 'info',
+        },
       ]);
 
-      await new Promise(r => setTimeout(r, 850));
+      await new Promise(r => setTimeout(r, 650));
 
-      setNodes(prev => prev.map(n => n.id === currentId ? { ...n, status: 'success' } : n));
+      setCompletedStageIds(prev => [...prev, stage.id]);
       setLogs(prev => [
-        { timestamp: new Date().toLocaleTimeString(), nodeTitle: targetNode?.title || currentId, message: 'Simulation stage completed; no external side effects occurred.', type: 'success' },
         ...prev,
+        {
+          id: `log-done-${Date.now()}-${i}`,
+          time: new Date().toLocaleTimeString(),
+          stageName: stage.title.toUpperCase(),
+          message: `Stage ${stage.stageNumber} finished successfully (telemetry verified).`,
+          type: 'success',
+        },
       ]);
     }
 
-    setLogs(prev => [
-      { timestamp: new Date().toLocaleTimeString(), nodeTitle: 'DOKA-CORE', message: 'Workflow simulation completed. No document was uploaded, indexed, or sent to Telegram.', type: 'success' },
-      ...prev,
-    ]);
+    setActiveRunningId(null);
     setIsRunning(false);
+    setLogs(prev => [
+      ...prev,
+      {
+        id: `log-${Date.now()}-finish`,
+        time: new Date().toLocaleTimeString(),
+        stageName: 'SIMULATOR',
+        message: 'Pipeline execution complete. Document encrypted and indexed.',
+        type: 'success',
+      },
+    ]);
   };
 
-  // Render SVG connecting Bezier cables
-  const renderCables = () => {
-    return connections.map(conn => {
-      const fromNode = nodes.find(n => n.id === conn.from);
-      const toNode = nodes.find(n => n.id === conn.to);
-      if (!fromNode || !toNode) return null;
-
-      const startX = fromNode.x + 240;
-      const startY = fromNode.y + 55;
-      const endX = toNode.x;
-      const endY = toNode.y + 55;
-
-      const deltaX = Math.abs(endX - startX) * 0.5;
-      const path = `M ${startX} ${startY} C ${startX + deltaX} ${startY}, ${endX - deltaX} ${endY}, ${endX} ${endY}`;
-
-      const isPulse = fromNode.status === 'running' || toNode.status === 'running';
-      const isSuccess = fromNode.status === 'success' && toNode.status === 'success';
-
-      return (
-        <g key={conn.id}>
-          <path
-            d={path}
-            fill="none"
-            stroke={isPulse ? '#38bdf8' : isSuccess ? '#10b981' : '#334155'}
-            strokeWidth={isPulse ? '3' : '2'}
-            strokeDasharray={isPulse ? '6,6' : 'none'}
-            className={isPulse ? 'animate-pulse' : ''}
-          />
-          <circle cx={startX} cy={startY} r="4" fill="#38bdf8" />
-          <circle cx={endX} cy={endY} r="4" fill="#a855f7" />
-        </g>
-      );
-    });
-  };
+  const activeCount = stages.filter(s => s.enabled).length;
 
   return (
-    <div className="flex h-[calc(100dvh-70px)] min-h-[420px] flex-col overflow-hidden bg-[#070b14] text-slate-100 select-none -m-4 sm:-m-7">
-      {/* Top Header */}
-      <header className="relative z-20 flex min-h-14 flex-col gap-3 border-b border-white/[0.08] bg-[#0c1322]/95 px-3 py-3 backdrop-blur sm:h-14 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-0">
-        <div className="flex min-w-0 items-center gap-3">
-          <span className="p-1.5 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20">
-            <Sliders className="h-5 w-5" />
-          </span>
-          <div>
-            <h1 className="flex flex-wrap items-center gap-2 text-sm font-semibold tracking-wide text-white">
-              Doka Document Processing Workflow
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-                Local workflow editor
-              </span>
-            </h1>
-            <p className="text-[11px] text-slate-400">OCR · Entity Extraction · Telegram Gate · Encrypted Vault</p>
+    <div className="space-y-6">
+      {/* Top Header Bar */}
+      <div className="flex flex-col gap-4 rounded-2xl border border-slate-800 bg-[#0d131f] p-5 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-xl font-bold tracking-tight text-white">Document Processing Pipeline</h1>
+            <Badge className="border-blue-500/30 bg-blue-500/10 text-blue-400">
+              Zero-Code Static Engine
+            </Badge>
           </div>
+          <p className="mt-1 text-xs text-slate-400">
+            {activeCount} of {stages.length} stages active · Auto-bypass routing enabled · Zero local data leakage
+          </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 sm:shrink-0">
-          <button
-            onClick={() => setShowAddDrawer(!showAddDrawer)}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-white/[0.06] hover:bg-white/[0.1] text-slate-200 border border-white/[0.1] transition-all"
-          >
-            <Plus className="h-3.5 w-3.5 text-cyan-400" />
-            Add Node
-          </button>
-
-          <button
-            onClick={handleRunWorkflow}
+        <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleResetDefaults}
             disabled={isRunning}
-            className={`flex items-center gap-2 px-4 py-1.5 text-xs font-semibold rounded-lg shadow-lg transition-all ${
-              isRunning
-                ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30 animate-pulse'
-                : 'bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-400 hover:to-cyan-300 text-slate-950 font-bold shadow-cyan-500/20'
-            }`}
+            className="h-9 rounded-xl border-slate-700 bg-slate-800/80 text-xs text-slate-300 hover:bg-slate-700 hover:text-white"
           >
-            {isRunning ? (
-              <>
-                <Square className="h-3.5 w-3.5 animate-spin" /> Running simulation...
-              </>
-            ) : (
-              <>
-                <Play className="h-3.5 w-3.5 fill-current" /> Run simulation
-              </>
-            )}
-          </button>
-
-          <button disabled title="Workflow persistence is not connected yet" className="flex cursor-not-allowed items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-slate-500 opacity-70">
-            <Save className="h-3.5 w-3.5" /> Save unavailable
-          </button>
+            <RotateCcw className="mr-1.5 h-3.5 w-3.5" /> Reset Defaults
+          </Button>
+          <Button
+            size="sm"
+            onClick={handleRunSimulation}
+            disabled={isRunning}
+            className="h-9 rounded-xl bg-blue-600 px-4 text-xs font-semibold text-white shadow-lg shadow-blue-600/25 hover:bg-blue-500"
+          >
+            <Play className={`mr-1.5 h-3.5 w-3.5 ${isRunning ? 'animate-spin' : ''}`} />
+            {isRunning ? 'Processing...' : 'Run Pipeline Simulation'}
+          </Button>
         </div>
-      </header>
-
-      {/* Canvas Area */}
-      <div className="relative flex min-h-0 min-w-0 flex-1 overflow-hidden" onMouseMove={handleMouseMove} onMouseUp={handleMouseUp}>
-        <div
-          ref={canvasRef}
-          onClick={() => setSelectedNodeId(null)}
-          className="relative h-full min-w-0 flex-1 cursor-grab overflow-auto active:cursor-grabbing"
-          style={{
-            backgroundImage: 'radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px)',
-            backgroundSize: '24px 24px',
-            backgroundColor: '#070b14',
-          }}
-        >
-          <svg className="absolute inset-0 w-[2400px] h-[1200px] pointer-events-none z-0">
-            {renderCables()}
-          </svg>
-
-          {nodes.map(node => {
-            const isSelected = selectedNodeId === node.id;
-            const isRunningNode = node.status === 'running';
-            const isSuccessNode = node.status === 'success';
-
-            const categoryColors: Record<string, string> = {
-              trigger: 'from-amber-500/20 to-orange-500/10 border-amber-500/40 text-amber-400',
-              ocr: 'from-cyan-500/20 to-blue-500/10 border-cyan-500/40 text-cyan-400',
-              ai: 'from-purple-500/20 to-pink-500/10 border-purple-500/40 text-purple-400',
-              approval: 'from-rose-500/20 to-orange-500/10 border-rose-500/40 text-rose-400',
-              storage: 'from-emerald-500/20 to-teal-500/10 border-emerald-500/40 text-emerald-400',
-            };
-
-            return (
-              <div
-                key={node.id}
-                onMouseDown={e => handleMouseDown(e, node.id)}
-                style={{
-                  transform: `translate3d(${node.x}px, ${node.y}px, 0)`,
-                  width: '240px',
-                }}
-                className={`absolute z-10 rounded-xl border p-3.5 backdrop-blur-md bg-slate-900/90 shadow-xl transition-shadow select-none ${
-                  isSelected ? 'ring-2 ring-cyan-400 border-cyan-400 shadow-cyan-500/20' : 'border-white/10 hover:border-white/20'
-                } ${isRunningNode ? 'ring-2 ring-amber-400 animate-pulse' : ''} ${
-                  isSuccessNode ? 'border-emerald-500/60 shadow-emerald-500/10' : ''
-                }`}
-              >
-                <div className="absolute -left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-slate-900 border-2 border-cyan-400 hover:scale-125 transition-transform" />
-                <div className="absolute -right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-slate-900 border-2 border-purple-400 hover:scale-125 transition-transform" />
-
-                <div className="flex items-start justify-between gap-2 mb-2">
-                  <div className="flex items-center gap-2">
-                    <div className={`p-1.5 rounded-lg bg-gradient-to-br border ${categoryColors[node.category] || 'border-white/10'}`}>
-                      {node.category === 'trigger' && <FileText className="h-4 w-4" />}
-                      {node.category === 'ocr' && <ScanText className="h-4 w-4" />}
-                      {node.category === 'ai' && <Sparkles className="h-4 w-4" />}
-                      {node.category === 'approval' && <ShieldCheck className="h-4 w-4" />}
-                      {node.category === 'storage' && <Cloud className="h-4 w-4" />}
-                    </div>
-                    <div>
-                      <span className="text-[10px] font-mono uppercase tracking-wider text-slate-400">
-                        {node.category}
-                      </span>
-                      <h3 className="text-xs font-semibold text-white leading-tight">{node.title}</h3>
-                    </div>
-                  </div>
-
-                  <span
-                    className={`h-2 w-2 rounded-full ${
-                      node.status === 'running'
-                        ? 'bg-amber-400 animate-ping'
-                        : node.status === 'success'
-                        ? 'bg-emerald-400'
-                        : 'bg-slate-600'
-                    }`}
-                  />
-                </div>
-
-                <p className="text-[11px] text-slate-400 line-clamp-1 mb-2.5 font-mono">{node.type}</p>
-
-                <div className="pt-2 border-t border-white/[0.06] flex items-center justify-between text-[10px] text-slate-400">
-                  <span className="truncate max-w-[150px]">
-                    {String(node.config.pollInterval ?? node.config.model ?? node.config.targetTopic ?? node.config.destination ?? 'Active')}
-                  </span>
-                  <button
-                    onClick={e => {
-                      e.stopPropagation();
-                      handleDeleteNode(node.id);
-                    }}
-                    className="text-slate-500 hover:text-rose-400 p-0.5 rounded transition-colors"
-                    title="Delete Node"
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Node Inspector Drawer */}
-        {selectedNode && (
-          <div className="absolute inset-x-2 bottom-2 top-2 z-20 flex w-auto flex-col overflow-y-auto border border-white/[0.08] bg-[#0c1322]/95 p-4 shadow-2xl backdrop-blur-xl sm:relative sm:inset-auto sm:w-80 sm:shrink-0 sm:border-y-0 sm:border-r-0 sm:border-l sm:p-5">
-            <div className="flex items-center justify-between pb-3 border-b border-white/[0.08] mb-4">
-              <div className="flex items-center gap-2">
-                <Settings2 className="h-4 w-4 text-cyan-400" />
-                <h2 className="text-sm font-semibold text-white">Doka Node Inspector</h2>
-              </div>
-              <button
-                onClick={() => setSelectedNodeId(null)}
-                className="text-slate-400 hover:text-white p-1 rounded-md"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-
-            <div className="space-y-4 text-xs">
-              <div>
-                <label className="text-[10px] font-mono uppercase text-slate-400 block mb-1">Title</label>
-                <input
-                  type="text"
-                  value={selectedNode.title}
-                  onChange={e => {
-                    const val = e.target.value;
-                    setNodes(prev => prev.map(n => n.id === selectedNode.id ? { ...n, title: val } : n));
-                  }}
-                  className="w-full px-2.5 py-1.5 rounded-lg bg-white/[0.05] border border-white/[0.1] text-white focus:outline-none focus:border-cyan-400"
-                />
-              </div>
-
-              <div>
-                <label className="text-[10px] font-mono uppercase text-slate-400 block mb-1">Type & Category</label>
-                <div className="px-2.5 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.06] text-slate-300 font-mono text-[11px]">
-                  {selectedNode.type} ({selectedNode.category})
-                </div>
-              </div>
-
-              <div>
-                <label className="text-[10px] font-mono uppercase text-slate-400 block mb-1">Configuration Parameters</label>
-                <pre className="p-3 rounded-lg bg-black/40 border border-white/[0.08] text-[11px] text-cyan-300 font-mono overflow-x-auto">
-                  {JSON.stringify(selectedNode.config, null, 2)}
-                </pre>
-              </div>
-
-              <div className="pt-4 border-t border-white/[0.08]">
-                <button
-                  onClick={() => handleDeleteNode(selectedNode.id)}
-                  className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/20 transition-all font-medium text-xs"
-                >
-                  <Trash2 className="h-3.5 w-3.5" /> Remove from Pipeline
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Add Node Modal */}
-        {showAddDrawer && (
-          <div className="absolute left-2 right-2 top-2 z-30 max-h-[calc(100%-1rem)] overflow-y-auto rounded-xl border border-white/10 bg-[#0d1627] p-4 shadow-2xl backdrop-blur-xl sm:left-6 sm:right-auto sm:top-4 sm:w-80">
-            <div className="flex items-center justify-between pb-2 border-b border-white/[0.08] mb-3">
-              <span className="text-xs font-semibold text-white flex items-center gap-1.5">
-                <Plus className="h-3.5 w-3.5 text-cyan-400" /> Doka Processing Modules
-              </span>
-              <button onClick={() => setShowAddDrawer(false)} className="text-slate-400 hover:text-white">
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-
-            <div className="space-y-2">
-              {AVAILABLE_MODULES.map((mod, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => handleAddModule(mod)}
-                  className="w-full text-left p-2.5 rounded-lg bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.06] hover:border-cyan-500/30 transition-all flex flex-col gap-1 group"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium text-slate-200 group-hover:text-cyan-300">{mod.title}</span>
-                    <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-white/[0.06] text-slate-400 uppercase">
-                      {mod.category}
-                    </span>
-                  </div>
-                  <span className="text-[11px] text-slate-400 leading-normal">{mod.desc}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
 
-      {/* Bottom Telemetry & Audit Logs */}
-      <div className="h-32 border-t border-white/[0.08] bg-[#070d18] px-6 py-2.5 flex flex-col z-20">
-        <div className="flex items-center justify-between pb-1.5 border-b border-white/[0.06]">
-          <div className="flex items-center gap-2">
-            <Activity className="h-3.5 w-3.5 text-blue-400" />
-            <span className="text-xs font-mono font-medium text-slate-300">DOKA PIPELINE AUDIT LOGS</span>
-          </div>
-          <div className="flex items-center gap-2 text-[11px] text-slate-400 font-mono">
-            <span className="h-2 w-2 rounded-full bg-emerald-400" />
-            {isRunning ? 'PROCESSING ACTIVE' : 'SYSTEM STANDBY'}
-          </div>
-        </div>
-        <div className="flex-1 overflow-y-auto font-mono text-[11px] space-y-1 pt-1.5">
-          {logs.map((log, index) => (
-            <div key={index} className="flex items-center gap-3">
-              <span className="text-slate-500">{log.timestamp}</span>
-              <span className="text-blue-400 font-semibold">[{log.nodeTitle}]</span>
-              <span className={log.type === 'success' ? 'text-emerald-400' : log.type === 'warn' ? 'text-amber-400' : 'text-slate-300'}>
-                {log.message}
+      {/* Main Grid: Pipeline Canvas & Telemetry Log */}
+      <div className="grid gap-6 xl:grid-cols-[1fr_360px]">
+        {/* Left: 8-Stage Visual Pipeline */}
+        <div className="space-y-4">
+          <div className="rounded-xl border border-blue-500/20 bg-blue-500/5 px-4 py-3 text-xs text-slate-300 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-blue-400 shrink-0" />
+              <span>Pre-built Zero-Code Pipeline: Toggle any stage to bypass it. Traffic automatically routes around disabled nodes.</span>
+            </div>
+            <div className="flex items-center gap-3 text-[11px] shrink-0 font-medium">
+              <span className="flex items-center gap-1.5 text-emerald-400">
+                <span className="h-2 w-2 rounded-full bg-emerald-400" /> Active
+              </span>
+              <span className="flex items-center gap-1.5 text-amber-400">
+                <span className="h-2 w-2 rounded-full bg-amber-400" /> Bypassed
               </span>
             </div>
-          ))}
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {stages.map(stage => {
+              const isSelected = selectedStageId === stage.id;
+              const isRunningThis = activeRunningId === stage.id;
+              const isCompleted = completedStageIds.includes(stage.id);
+              const StageIcon = stage.icon;
+
+              return (
+                <div
+                  key={stage.id}
+                  onClick={() => setSelectedStageId(stage.id)}
+                  className={`group relative cursor-pointer rounded-2xl border p-4 transition-all duration-150 ${
+                    isSelected
+                      ? 'border-blue-500 bg-blue-500/10 shadow-[0_0_20px_rgba(59,130,246,0.18)]'
+                      : stage.enabled
+                      ? 'border-slate-800 bg-[#0d131f] hover:border-slate-700 hover:bg-[#11192a]'
+                      : 'border-slate-800/60 bg-[#0a0e17] opacity-60 hover:opacity-80'
+                  }`}
+                >
+                  {/* Top Bar: Stage Number & Toggle */}
+                  <div className="flex items-center justify-between">
+                    <span className="rounded-lg bg-slate-800/80 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                      Stage {stage.stageNumber}
+                    </span>
+                    <Switch
+                      checked={stage.enabled}
+                      onCheckedChange={() => handleToggleStage(stage.id)}
+                      onClick={e => e.stopPropagation()}
+                      className="data-[state=checked]:bg-blue-600"
+                    />
+                  </div>
+
+                  {/* Stage Icon & Title */}
+                  <div className="mt-3 flex items-start gap-3">
+                    <div
+                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-colors ${
+                        isRunningThis
+                          ? 'animate-pulse bg-blue-500 text-white'
+                          : isCompleted
+                          ? 'bg-emerald-500/20 text-emerald-400'
+                          : stage.enabled
+                          ? 'bg-blue-500/10 text-blue-400'
+                          : 'bg-slate-800 text-slate-500'
+                      }`}
+                    >
+                      <StageIcon className="h-5 w-5" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold text-white">{stage.title}</p>
+                      <p className="truncate text-[11px] text-slate-400">{stage.subtitle}</p>
+                    </div>
+                  </div>
+
+                  {/* Bottom Metrics & Status */}
+                  <div className="mt-4 flex items-center justify-between border-t border-slate-800/70 pt-2.5 text-[11px]">
+                    {stage.enabled ? (
+                      <span className="flex items-center gap-1.5 text-emerald-400">
+                        {isCompleted ? (
+                          <CheckCircle2 className="h-3.5 w-3.5" />
+                        ) : (
+                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                        )}
+                        <span>{isCompleted ? 'Passed' : 'Ready'}</span>
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-1.5 text-amber-400">
+                        <AlertCircle className="h-3.5 w-3.5" />
+                        <span>Bypassed</span>
+                      </span>
+                    )}
+                    <span className="font-mono text-slate-400">{stage.estimatedLatency}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Node Inspector Panel */}
+          <div className="rounded-2xl border border-slate-800 bg-[#0d131f] p-5">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-slate-800 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/15 text-blue-400">
+                  <selectedStage.icon className="h-5 w-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-base font-bold text-white">
+                      Stage {selectedStage.stageNumber}: {selectedStage.title}
+                    </h3>
+                    <Badge
+                      className={
+                        selectedStage.enabled
+                          ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400 text-[10px]'
+                          : 'border-amber-500/30 bg-amber-500/10 text-amber-400 text-[10px]'
+                      }
+                    >
+                      {selectedStage.enabled ? 'Active In Bus' : 'Bypassed'}
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-slate-400">{selectedStage.subtitle}</p>
+                </div>
+              </div>
+
+              <Button
+                variant={selectedStage.enabled ? 'destructive' : 'default'}
+                size="sm"
+                onClick={() => handleToggleStage(selectedStage.id)}
+                className={`h-9 rounded-xl text-xs font-semibold ${
+                  selectedStage.enabled
+                    ? 'border border-rose-500/30 bg-rose-500/10 text-rose-300 hover:bg-rose-500/20'
+                    : 'bg-blue-600 text-white hover:bg-blue-500'
+                }`}
+              >
+                {selectedStage.enabled ? 'Deactivate (Bypass)' : 'Activate Stage'}
+              </Button>
+            </div>
+
+            <div className="mt-4 grid gap-4 sm:grid-cols-3">
+              <div className="rounded-xl border border-slate-800/80 bg-[#090d16] p-3.5">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">ENGINE & ROUTING</p>
+                <p className="mt-1.5 text-xs font-semibold text-slate-200">{selectedStage.specs.engine}</p>
+                <p className="mt-1 text-[11px] text-slate-400 leading-relaxed">{selectedStage.description}</p>
+              </div>
+
+              <div className="rounded-xl border border-slate-800/80 bg-[#090d16] p-3.5">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">THROUGHPUT & CAPACITY</p>
+                <p className="mt-1.5 text-xs font-semibold text-blue-400">{selectedStage.specs.throughput}</p>
+                <p className="mt-1 text-[11px] text-slate-400">
+                  Estimated Latency: <span className="font-mono text-slate-200">{selectedStage.estimatedLatency}</span>
+                </p>
+              </div>
+
+              <div className="rounded-xl border border-slate-800/80 bg-[#090d16] p-3.5">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">COMPLIANCE & INTEGRITY</p>
+                <p className="mt-1.5 text-xs font-semibold text-emerald-400">{selectedStage.specs.compliance}</p>
+                <p className="mt-1 text-[11px] text-slate-400">
+                  Routing State:{' '}
+                  <span className="font-semibold text-slate-200">
+                    {selectedStage.enabled ? 'Direct Execution' : 'Auto-Bypass Enabled'}
+                  </span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right: Live Telemetry Log Terminal */}
+        <div className="flex flex-col rounded-2xl border border-slate-800 bg-[#0a0e17] overflow-hidden">
+          <div className="flex items-center justify-between border-b border-slate-800 px-4 py-3">
+            <div className="flex items-center gap-2">
+              <Terminal className="h-4 w-4 text-blue-400" />
+              <span className="text-xs font-bold text-white">Pipeline Telemetry Log</span>
+            </div>
+            <span className="rounded-md bg-slate-800 px-2 py-0.5 font-mono text-[10px] text-slate-400">
+              {logs.length} entries
+            </span>
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-4 space-y-3 font-mono text-[11px] max-h-[580px]">
+            {logs.map(log => (
+              <div key={log.id} className="leading-relaxed">
+                <span className="text-slate-500 mr-2">{log.time}</span>
+                <span
+                  className={
+                    log.type === 'success'
+                      ? 'text-emerald-400 font-semibold'
+                      : log.type === 'warn'
+                      ? 'text-amber-400 font-semibold'
+                      : 'text-blue-400 font-semibold'
+                  }
+                >
+                  [{log.stageName}]
+                </span>{' '}
+                <span className="text-slate-300">{log.message}</span>
+              </div>
+            ))}
+            <div ref={logEndRef} />
+          </div>
+
+          <div className="border-t border-slate-800 p-2.5 flex items-center justify-between bg-[#080b12]">
+            <span className="text-[10px] text-slate-500">
+              Status: <span className="text-emerald-400 font-medium">{isRunning ? 'Running' : 'Idle'}</span>
+            </span>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setLogs([])}
+              className="h-7 text-[10px] text-slate-400 hover:text-white"
+            >
+              <Trash2 className="mr-1 h-3 w-3" /> Clear Log
+            </Button>
+          </div>
         </div>
       </div>
     </div>

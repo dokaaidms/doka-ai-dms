@@ -9,7 +9,7 @@ interface DokaLogoProps {
 export function DokaLogo({
   className = '',
   size = 40,
-  showText = true,
+  showText = false,
 }: DokaLogoProps) {
   return (
     <div className={`flex items-center gap-3 select-none ${className}`}>

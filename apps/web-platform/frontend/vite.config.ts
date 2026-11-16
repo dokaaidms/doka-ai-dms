@@ -4,7 +4,7 @@ import { defineConfig } from "vitest/config"
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: './',
+  base: '/',
   plugins: [react()],
   test: {
     include: ["src/**/*.test.{ts,tsx}"],
