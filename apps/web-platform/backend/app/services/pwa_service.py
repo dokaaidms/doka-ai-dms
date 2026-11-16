@@ -10,8 +10,8 @@ class PWAService:
     """Service for generating PWA manifest and service worker configuration."""
 
     def __init__(self):
-        self.app_name = "Enterprise DMS"
-        self.short_name = "DMS"
+        self.app_name = "Doka AI DMS"
+        self.short_name = "Doka AI"
         self.theme_color = "#2563eb"
         self.background_color = "#ffffff"
         self.display = "standalone"
@@ -26,7 +26,7 @@ class PWAService:
         manifest = {
             "name": self.app_name,
             "short_name": self.short_name,
-            "description": "Enterprise Document Management System",
+            "description": "Doka AI Document Management System",
             "start_url": "/dashboard",
             "display": self.display,
             "background_color": self.background_color,

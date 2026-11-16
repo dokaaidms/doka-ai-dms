@@ -91,8 +91,8 @@ async def lifespan(_: "FastAPI"):
 
 def create_app() -> FastAPI:
     app = FastAPI(
-        title="Doka — Personal Local Edition",
-        description="Safe local document workspace with read-only source protection.",
+        title="Doka AI DMS",
+        description="Safe document workspace with AI and automation.",
         version="2.0.0-personal-local",
         docs_url="/api/docs" if settings.DEBUG else None,
         lifespan=lifespan,

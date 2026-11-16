@@ -1,7 +1,7 @@
 {
-  "name": "Enterprise AI DMS",
-  "short_name": "DMS",
-  "description": "Enterprise AI Document Management System with Myanmar language support",
+  "name": "Doka AI DMS",
+  "short_name": "Doka AI",
+  "description": "Doka AI Document Management System with Myanmar language support",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
