@@ -289,27 +289,30 @@ export default function TemplateLibrary() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-slate-500">Loading templates...</div>
+        <div className="text-slate-400 font-mono text-sm animate-pulse">Loading templates...</div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="doka-dashboard">
       {/* Header */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Template Library</h2>
-          <p className="text-slate-500 dark:text-slate-400">
-            Pre-built workflow templates for common processes
+          <div className="mb-2 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-400">
+            <FileText className="h-4 w-4" /> SOP Automation Blueprint
+          </div>
+          <h1 className="text-3xl font-bold tracking-tight text-white">Workflow Template Library</h1>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">
+            Pre-configured process blueprints for Myanmar customs clearance, NRC identity KYC, and automated tax audits.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button onClick={loadTemplates} variant="outline" size="sm">
+          <Button onClick={loadTemplates} variant="outline" size="sm" className="h-10 rounded-xl border-slate-700 bg-slate-900 text-slate-200 hover:border-emerald-500/40 hover:text-white">
             <RefreshCw className="w-4 h-4 mr-2" />
             Refresh
           </Button>
-          <Button onClick={() => { resetForm(); setShowCreateDialog(true); }}>
+          <Button onClick={() => { resetForm(); setShowCreateDialog(true); }} className="h-10 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold">
             <Plus className="w-4 h-4 mr-2" />
             Create Template
           </Button>
@@ -318,81 +321,91 @@ export default function TemplateLibrary() {
 
       {/* Alerts */}
       {error && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
+        <Alert variant="destructive" className="border-rose-500/30 bg-rose-950/20 text-rose-200">
+          <AlertCircle className="h-4 w-4 text-rose-400" />
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
 
       {success && (
-        <Alert>
-          <CheckCircle className="h-4 w-4" />
+        <Alert className="border-emerald-500/30 bg-emerald-950/20 text-emerald-300">
+          <CheckCircle className="h-4 w-4 text-emerald-400" />
           <AlertDescription>{success}</AlertDescription>
         </Alert>
       )}
 
       {/* Category Filter */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex flex-wrap gap-2">
+      <Card className="rounded-2xl border border-slate-800/80 bg-[#0E1420]/90 shadow-sm p-4">
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant={selectedCategory === 'all' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setSelectedCategory('all')}
+            className={`rounded-xl text-xs ${
+              selectedCategory === 'all'
+                ? 'bg-emerald-600 text-white hover:bg-emerald-500'
+                : 'border-slate-700 bg-slate-900 text-slate-300 hover:text-white'
+            }`}
+          >
+            All Templates
+          </Button>
+          {TEMPLATE_CATEGORIES.map(category => (
             <Button
-              variant={selectedCategory === 'all' ? 'default' : 'outline'}
+              key={category.value}
+              variant={selectedCategory === category.value ? 'default' : 'outline'}
               size="sm"
-              onClick={() => setSelectedCategory('all')}
+              onClick={() => setSelectedCategory(category.value)}
+              className={`rounded-xl text-xs ${
+                selectedCategory === category.value
+                  ? 'bg-emerald-600 text-white hover:bg-emerald-500'
+                  : 'border-slate-700 bg-slate-900 text-slate-300 hover:text-white'
+              }`}
             >
-              All Templates
+              <category.icon className="w-4 h-4 mr-2" />
+              {category.label}
             </Button>
-            {TEMPLATE_CATEGORIES.map(category => (
-              <Button
-                key={category.value}
-                variant={selectedCategory === category.value ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setSelectedCategory(category.value)}
-              >
-                <category.icon className="w-4 h-4 mr-2" />
-                {category.label}
-              </Button>
-            ))}
-          </div>
-        </CardContent>
+          ))}
+        </div>
       </Card>
 
       {/* Create Template Dialog */}
       {showCreateDialog && (
-        <Card className="border-blue-200">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="w-5 h-5" />
-              Create New Template
+        <Card className="rounded-2xl border border-emerald-500/30 bg-[#0E1420] shadow-xl p-6">
+          <CardHeader className="p-0 pb-4 border-b border-slate-800">
+            <CardTitle className="flex items-center gap-2 text-white text-lg">
+              <FileText className="w-5 h-5 text-emerald-400" />
+              Create Standard Operating Procedure Template
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-0 pt-4">
             <div className="space-y-6">
               {/* Basic Info */}
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label>Template Name</Label>
+                  <Label className="text-xs text-slate-300">Template Name</Label>
                   <Input
                     value={templateName}
                     onChange={(e) => setTemplateName(e.target.value)}
-                    placeholder="e.g., Express Import Process"
+                    placeholder="e.g., Express Port Ingest & Tax Audit"
+                    className="border-slate-700 bg-slate-900 text-white placeholder-slate-500"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Description</Label>
+                  <Label className="text-xs text-slate-300">Description</Label>
                   <Input
                     value={templateDescription}
                     onChange={(e) => setTemplateDescription(e.target.value)}
-                    placeholder="Describe the workflow"
+                    placeholder="Describe this workflow's compliance and operational intent..."
+                    className="border-slate-700 bg-slate-900 text-white placeholder-slate-500"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Category</Label>
+                  <Label className="text-xs text-slate-300">Category</Label>
                   <Select value={templateCategory} onValueChange={setTemplateCategory}>
-                    <SelectTrigger>
+                    <SelectTrigger className="border-slate-700 bg-slate-900 text-white">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="border-slate-800 bg-[#0E1420] text-white">
                       {TEMPLATE_CATEGORIES.map(category => (
                         <SelectItem key={category.value} value={category.value}>
                           {category.label}
@@ -406,76 +419,63 @@ export default function TemplateLibrary() {
               {/* Steps */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <Label className="text-lg font-medium">Workflow Steps</Label>
-                  <Button onClick={addStep} size="sm" variant="outline">
+                  <Label className="text-sm font-bold text-white">Workflow Step Sequence</Label>
+                  <Button onClick={addStep} size="sm" variant="outline" className="border-slate-700 text-slate-200 hover:text-white rounded-xl">
                     <Plus className="w-4 h-4 mr-2" />
                     Add Step
                   </Button>
                 </div>
                 {templateSteps.map((step, index) => (
-                  <div key={index} className="p-4 bg-slate-50 dark:bg-slate-900 rounded-lg space-y-3">
+                  <div key={index} className="p-4 bg-slate-900/60 border border-slate-800 rounded-xl space-y-3">
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline">Step {index + 1}</Badge>
+                      <Badge variant="outline" className="border-emerald-500/30 bg-emerald-500/10 text-emerald-400 font-mono text-xs">
+                        Stage {index + 1}
+                      </Badge>
                       <Button
                         onClick={() => removeStep(index)}
                         variant="ghost"
                         size="icon"
-                        className="text-red-600 ml-auto"
+                        className="text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 ml-auto h-8 w-8"
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       <div className="space-y-2">
-                        <Label>Step Title</Label>
+                        <Label className="text-xs text-slate-300">Step Title</Label>
                         <Input
                           value={step.title}
                           onChange={(e) => updateStep(index, 'title', e.target.value)}
-                          placeholder="e.g., Document Review"
+                          placeholder="e.g., Cryptographic Verification"
+                          className="border-slate-700 bg-slate-900 text-white"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label>Assignee Role</Label>
+                        <Label className="text-xs text-slate-300">Assignee Role</Label>
                         <Select
                           value={step.assignee_role}
                           onValueChange={(value) => updateStep(index, 'assignee_role', value)}
                         >
-                          <SelectTrigger>
+                          <SelectTrigger className="border-slate-700 bg-slate-900 text-white">
                             <SelectValue />
                           </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="staff">Staff</SelectItem>
-                            <SelectItem value="admin">Admin</SelectItem>
+                          <SelectContent className="border-slate-800 bg-[#0E1420] text-white">
+                            <SelectItem value="staff">Staff Operator</SelectItem>
+                            <SelectItem value="admin">Compliance Admin</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Description</Label>
-                      <Input
-                        value={step.description}
-                        onChange={(e) => updateStep(index, 'description', e.target.value)}
-                        placeholder="Describe this step"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Estimated Duration (minutes)</Label>
-                      <Input
-                        type="number"
-                        value={step.estimated_duration}
-                        onChange={(e) => updateStep(index, 'estimated_duration', parseInt(e.target.value))}
-                      />
                     </div>
                   </div>
                 ))}
               </div>
 
               {/* Actions */}
-              <div className="flex gap-2">
-                <Button onClick={createTemplate}>
+              <div className="flex gap-2 pt-2">
+                <Button onClick={createTemplate} className="bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl">
                   Create Template
                 </Button>
-                <Button onClick={() => { setShowCreateDialog(false); resetForm(); }} variant="outline">
+                <Button onClick={() => { setShowCreateDialog(false); resetForm(); }} variant="outline" className="border-slate-700 text-slate-300 rounded-xl">
                   Cancel
                 </Button>
               </div>
@@ -487,63 +487,71 @@ export default function TemplateLibrary() {
       {/* Templates Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredTemplates.map(template => {
-          const categoryInfo = TEMPLATE_CATEGORIES.find(c => c.value === template.category);
+          const categoryInfo = TEMPLATE_CATEGORIES.find(c => c.value === template.category) || TEMPLATE_CATEGORIES[0];
           return (
-            <Card key={template.id} className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <categoryInfo.icon className="w-5 h-5 text-slate-400" />
-                    <CardTitle className="text-lg">{template.name}</CardTitle>
+            <Card key={template.id} className="rounded-2xl border border-slate-800/80 bg-[#0E1420]/90 shadow-sm p-5 hover:border-emerald-500/40 transition flex flex-col justify-between">
+              <div>
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-400">
+                      <categoryInfo.icon className="w-5 h-5" />
+                    </span>
+                    <div>
+                      <h3 className="text-base font-bold text-white">{template.name}</h3>
+                      <span className="text-[10px] font-mono uppercase text-emerald-400 tracking-wider">
+                        {categoryInfo.label}
+                      </span>
+                    </div>
                   </div>
                   {template.is_default && (
-                    <Badge variant="secondary">Default</Badge>
+                    <Badge variant="outline" className="border-slate-700 bg-slate-800 text-[10px] font-mono text-slate-400">
+                      VERIFIED
+                    </Badge>
                   )}
                 </div>
-                <CardDescription>{template.description}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-slate-500">Steps</span>
-                    <span className="font-medium">{template.steps.length}</span>
+                <p className="text-xs text-slate-400 leading-relaxed mb-4">{template.description}</p>
+                <div className="space-y-2 py-3 border-y border-slate-800/80">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-slate-400">Pipeline Stages</span>
+                    <span className="font-mono font-bold text-white">{template.steps.length} Steps</span>
                   </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-slate-500">Total Time</span>
-                    <span className="font-medium flex items-center gap-1">
-                      <Clock className="w-3 h-3" />
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-slate-400">Estimated SLA</span>
+                    <span className="font-mono text-emerald-400 flex items-center gap-1">
+                      <Clock className="w-3.5 h-3.5" />
                       {totalEstimatedTime(template.steps)} min
                     </span>
                   </div>
-                  <div className="flex gap-2">
-                    <Button
-                      onClick={() => instantiateTemplate(template.id)}
-                      size="sm"
-                      className="flex-1"
-                    >
-                      <Zap className="w-4 h-4 mr-2" />
-                      Use Template
-                    </Button>
-                    <Button
-                      onClick={() => exportTemplate(template.id)}
-                      size="sm"
-                      variant="outline"
-                    >
-                      <Download className="w-4 h-4" />
-                    </Button>
-                    {!template.is_default && (
-                      <Button
-                        onClick={() => deleteTemplate(template.id)}
-                        size="sm"
-                        variant="ghost"
-                        className="text-red-600"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    )}
-                  </div>
                 </div>
-              </CardContent>
+              </div>
+              <div className="mt-4 flex gap-2">
+                <Button
+                  onClick={() => instantiateTemplate(template.id)}
+                  size="sm"
+                  className="flex-1 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs"
+                >
+                  <Zap className="w-4 h-4 mr-1.5" />
+                  Deploy SOP
+                </Button>
+                <Button
+                  onClick={() => exportTemplate(template.id)}
+                  size="sm"
+                  variant="outline"
+                  className="border-slate-700 bg-slate-900 text-slate-300 hover:text-white rounded-xl"
+                >
+                  <Download className="w-4 h-4" />
+                </Button>
+                {!template.is_default && (
+                  <Button
+                    onClick={() => deleteTemplate(template.id)}
+                    size="sm"
+                    variant="ghost"
+                    className="text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-xl"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                )}
+              </div>
             </Card>
           );
         })}
@@ -551,16 +559,14 @@ export default function TemplateLibrary() {
 
       {/* Empty State */}
       {filteredTemplates.length === 0 && (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <FileText className="w-12 h-12 text-slate-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-slate-900 dark:text-slate-100 mb-2">
-              No Templates Found
-            </h3>
-            <p className="text-slate-500 dark:text-slate-400">
-              Create your first workflow template or select a different category
-            </p>
-          </CardContent>
+        <Card className="rounded-2xl border border-slate-800/80 bg-[#0E1420]/90 shadow-sm p-12 text-center">
+          <FileText className="w-12 h-12 text-slate-500 mx-auto mb-4" />
+          <h3 className="text-lg font-bold text-white mb-1">
+            No Templates in Category
+          </h3>
+          <p className="text-sm text-slate-400">
+            Create a custom process template or choose another filter.
+          </p>
         </Card>
       )}
     </div>

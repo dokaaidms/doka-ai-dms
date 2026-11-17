@@ -18,6 +18,7 @@ import AuditPage from '@/pages/admin/Audit';
 import WorkflowsPage from '@/pages/Workflows';
 import SettingsPage from '@/pages/admin/Settings';
 import IntegrationsPage from '@/pages/admin/Integrations';
+import UserProfile from '@/pages/UserProfile';
 import {
   getCurrentUser,
   isSupabaseConfigured,
@@ -55,7 +56,7 @@ export default function App() {
     };
   }, []);
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center"><Skeleton className="h-8 w-32" /></div>;
+  if (loading) return <div className="min-h-screen bg-[#0B0F17] flex items-center justify-center"><Skeleton className="h-8 w-32 bg-slate-800" /></div>;
 
   const isAuthenticated = Boolean(user);
 
@@ -66,27 +67,28 @@ export default function App() {
       <Routes>
         <Route
           path="/login"
-          element={isAuthenticated ? <Navigate to={isLocalAuthEnabled() ? '/admin/workspace' : '/admin/dashboard'} replace /> : <Login onLogin={async () => setUser(isLocalAuthEnabled() ? await getLocalCurrentUser() : await getCurrentUser())} />}
+          element={isAuthenticated ? <Navigate to="/admin/dashboard" replace /> : <Login onLogin={async () => setUser(isLocalAuthEnabled() ? await getLocalCurrentUser() : await getCurrentUser())} />}
         />
         <Route path="/admin" element={isAuthenticated ? <AdminLayout /> : <Navigate to="/login" replace />}>
-          <Route path="dashboard" element={isLocalAuthEnabled() ? <Navigate to="/admin/workspace" replace /> : <PersonalDashboard />} />
+          <Route path="dashboard" element={<PersonalDashboard />} />
           <Route path="workspace" element={<WorkspaceReview />} />
-          <Route path="cloud-documents" element={isLocalAuthEnabled() ? <Navigate to="/admin/workspace" replace /> : <CloudDocuments />} />
-          <Route path="activity" element={isLocalAuthEnabled() ? <Navigate to="/admin/workspace" replace /> : <CloudAudit />} />
+          <Route path="cloud-documents" element={<CloudDocuments />} />
+          <Route path="activity" element={<CloudAudit />} />
           <Route path="usage" element={<AiUsage />} />
           <Route path="templates" element={<TemplatesPage />} />
           <Route path="rules" element={<RulesPage />} />
           <Route path="workflows" element={<WorkflowsPage />} />
           <Route path="permissions" element={<PermissionsPage />} />
           <Route path="audit" element={<AuditPage />} />
-          <Route index element={<Navigate to={isLocalAuthEnabled() ? 'workspace' : 'dashboard'} replace />} />
+          <Route path="profile" element={<UserProfile />} />
+          <Route index element={<Navigate to="dashboard" replace />} />
         </Route>
         <Route path="/admin/settings" element={isAuthenticated ? <AdminLayout /> : <Navigate to="/login" replace />}>
           <Route index element={<SettingsPage />} />
           <Route path="integrations" element={<IntegrationsPage />} />
         </Route>
-        <Route path="/" element={<Navigate to={isAuthenticated ? (isLocalAuthEnabled() ? '/admin/workspace' : '/admin/dashboard') : '/login'} replace />} />
-        <Route path="*" element={<Navigate to={isAuthenticated ? (isLocalAuthEnabled() ? '/admin/workspace' : '/admin/dashboard') : '/login'} replace />} />
+        <Route path="/" element={<Navigate to={isAuthenticated ? '/admin/dashboard' : '/login'} replace />} />
+        <Route path="*" element={<Navigate to={isAuthenticated ? '/admin/dashboard' : '/login'} replace />} />
       </Routes>
     </ErrorBoundary>
   );
