@@ -8,7 +8,7 @@
 [![Gemini AI](https://img.shields.io/badge/Gemini_2.0-Multimodal_Document_AI-4285F4?style=flat-square&logo=google)](https://deepmind.google/technologies/gemini/)
 [![Cloudinary](https://img.shields.io/badge/Cloudinary-Document_Vault-3448C5?style=flat-square&logo=cloudinary)](https://cloudinary.com/)
 [![Vercel](https://img.shields.io/badge/Vercel-Production_Live-black?style=flat-square&logo=vercel)](https://enterprise-ai-dms.vercel.app)
-[![Telegram](https://img.shields.io/badge/Telegram_Bot-Topic_#8-26A5E4?style=flat-square&logo=telegram)](https://t.me/)
+[![Telegram](https://img.shields.io/badge/Telegram_Bot-Topic_#8-26A5E4?style=flat-square&logo=telegram)](https://t.me/DokaAiDmsBot)
 
 ---
 
@@ -27,7 +27,7 @@ It transforms unstructured papers, PDFs, invoices, contracts, and scans into str
 * **🧠 Semantic Document RAG**: Vector-indexed retrieval powered by Supabase `pgvector` and Voyage AI.
 * **📁 Smart Category Organization**: Automatic contract analysis, invoice categorization, metadata extraction, and human-in-the-loop review.
 * **☁️ Cloud & Edge Hybrid**: Fast Edge API powered by Cloudflare Workers paired with Next.js 15 UI and Supabase Backend.
-* **🤖 Telegram Document Ingestion**: Send documents directly to `@DokaAiBot` in Topic `#8` for instant ingestion, OCR, and AI summary.
+* **🤖 Telegram Document Ingestion**: Send documents directly to `@DokaAiDmsBot` in Topic `#8` for instant ingestion, OCR, and AI summary.
 
 ---
 
