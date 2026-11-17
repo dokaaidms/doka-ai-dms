@@ -61,19 +61,29 @@ It transforms unstructured papers, PDFs, invoices, contracts, and scans into str
 
 ---
 
-## ⚡ Quickstart
+## ⚡ Local Development
+
+The web frontend and Python API are maintained as separate applications.
+
+**Frontend (terminal 1)**
 
 ```bash
-# 1. Install dependencies
-pnpm install
-
-# 2. Run local web platform
-pnpm dev
-
-# 3. Cloudflare Worker Edge
-cd apps/web-platform/backend/cloudflare_worker
-npx wrangler dev
+cd apps/web-platform/frontend
+npm ci
+npm run dev
 ```
+
+**Backend API (terminal 2)**
+
+```bash
+cd apps/web-platform/backend
+python -m venv .venv
+# Activate the virtual environment, then:
+python -m pip install -r requirements-local.txt
+uvicorn app.main:app --reload
+```
+
+The Cloudflare Worker has a separate Python Workers deployment configuration in `wrangler.jsonc`. Use the repository's Cloudflare Worker workflow and deployment documentation for that environment; do not treat the local FastAPI server as the Worker runtime.
 
 ---
 
