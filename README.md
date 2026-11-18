@@ -7,7 +7,7 @@
 
 <p align="center">
   <a href="https://github.com/dokaaidms/doka-ai-dms/actions"><img src="https://img.shields.io/github/actions/workflow/status/dokaaidms/doka-ai-dms/doka-quality-checks.yml?branch=main&style=for-the-badge&label=quality%20checks" alt="Quality checks"/></a>
-  <img src="https://img.shields.io/badge/Next.js-Frontend-111827?style=for-the-badge&logo=next.js" alt="Next.js"/>
+  <img src="https://img.shields.io/badge/Vite%20%2B%20React-Frontend-646CFF?style=for-the-badge&logo=vite" alt="Vite + React"/>
   <img src="https://img.shields.io/badge/FastAPI-Backend-009688?style=for-the-badge&logo=fastapi" alt="FastAPI"/>
   <img src="https://img.shields.io/badge/Cloudflare-Worker-F38020?style=for-the-badge&logo=cloudflare" alt="Cloudflare Workers"/>
   <img src="https://img.shields.io/badge/Supabase-Data%20%26%20Auth-3ECF8E?style=for-the-badge&logo=supabase" alt="Supabase"/>
