@@ -39,12 +39,13 @@ export default function App() {
           ? await getLocalCurrentUser()
           : (isSupabaseConfigured() ? await getCurrentUser() : null);
         if (mounted) {
-          setUser(currentUser || { id: 'doka-admin', email: 'logixaflow@gmail.com', role: 'admin' });
+          setUser(currentUser ?? null);
           setLoading(false);
         }
       } catch {
         if (mounted) {
-          setUser({ id: 'doka-admin', email: 'logixaflow@gmail.com', role: 'admin' });
+          // Auth failed — do NOT grant any fallback access, redirect to login
+          setUser(null);
           setLoading(false);
         }
       }
