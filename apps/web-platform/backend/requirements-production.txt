@@ -1,15 +1,15 @@
 # Production Requirements for Enterprise DMS
-fastapi==0.162.2
+fastapi==0.163.1
 uvicorn[standard]==0.54.0
 pydantic==2.14.3
-pydantic-settings==2.16.2
-python-multipart==0.0.33
-filelock>=4.2.9,<5
+pydantic-settings==2.16.3
+python-multipart==0.0.34
+filelock>=4.2.11,<5
 PyJWT==2.15.1
 passlib[bcrypt]==1.7.4
 argon2-cffi==25.1.0
 python-dotenv==1.2.4
-sqlalchemy==2.1.8
+sqlalchemy==2.1.9
 psycopg2-binary==2.9.13
 redis==8.1.0
 celery==5.7.0
@@ -21,10 +21,10 @@ reportlab==5.1.0
 openpyxl==3.1.5
 requests==2.34.2
 httpx==0.28.1
-loguru==0.7.3
+loguru==0.8.0
 aiofiles==25.1.0
-sentry-sdk==2.74.0
+sentry-sdk==2.75.0
 prometheus-client==0.26.0
-gunicorn==26.2.0
+gunicorn==27.0.1
 supervisor==4.3.0
-boto3==1.43.126
+boto3==1.44.4
