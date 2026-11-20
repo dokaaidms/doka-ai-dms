@@ -8,7 +8,7 @@ import os
 from datetime import datetime, timezone
 from urllib.parse import urlsplit
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.routes import cloud_documents, cloud_storage
@@ -72,6 +72,22 @@ def create_app() -> FastAPI:
     )
 
     app.middleware("http")(rate_limit_middleware)
+
+    @app.middleware("http")
+    async def cloud_security_headers(request: Request, call_next):
+        response = await call_next(request)
+        # This is a JSON/file API rather than a browser-rendered application.
+        # Keep its response policy deliberately restrictive and prevent cached
+        # authenticated documents from being stored by shared intermediaries.
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["Referrer-Policy"] = "no-referrer"
+        response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+        response.headers["Content-Security-Policy"] = "default-src 'none'; base-uri 'none'; frame-ancestors 'none'"
+        response.headers["Cache-Control"] = "no-store"
+        if settings.ENVIRONMENT.lower() == "production":
+            response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        return response
     app.include_router(cloud_documents.router)
     app.include_router(cloud_storage.router)
 

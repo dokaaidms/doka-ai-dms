@@ -1,5 +1,7 @@
 """The cloud API must never mount local filesystem/workspace endpoints."""
-from app.cloud_main import app, parse_cloud_cors_origins
+from fastapi.testclient import TestClient
+
+from app.cloud_main import app, create_app, parse_cloud_cors_origins
 
 
 def test_cloud_api_exposes_cloud_routes_only():
@@ -50,3 +52,15 @@ def test_cloud_cors_rejects_wildcard_and_non_origin_values(value):
 def test_cloud_cors_rejects_empty_production_allowlist():
     with pytest.raises(ValueError, match="explicit trusted origins"):
         parse_cloud_cors_origins("", "production")
+
+
+def test_cloud_api_applies_non_cacheable_security_headers(monkeypatch):
+    monkeypatch.setenv("CORS_ORIGINS", "https://doka.example.com")
+    with TestClient(create_app()) as client:
+        response = client.get("/health")
+
+    assert response.status_code == 200
+    assert response.headers["cache-control"] == "no-store"
+    assert response.headers["x-content-type-options"] == "nosniff"
+    assert response.headers["x-frame-options"] == "DENY"
+    assert "frame-ancestors 'none'" in response.headers["content-security-policy"]
