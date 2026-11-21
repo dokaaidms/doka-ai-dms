@@ -1,4 +1,4 @@
-import { getAccessToken, getCurrentUser, refreshSession } from './supabaseAuth';
+﻿import { getAccessToken, getCurrentUser, refreshSession } from './supabaseAuth';
 
 // Keep local Vite development on the local API proxy. Production uses the
 // verified Cloudflare Worker unless an environment-specific origin overrides it.

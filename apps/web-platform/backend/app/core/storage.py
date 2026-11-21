@@ -53,8 +53,13 @@ class LocalStorageManager:
         ext = original.suffix.lower()
         if not re.fullmatch(r"\.[A-Za-z0-9]{1,10}", ext):
             ext = ""
+        # Security: reject any path that contains traversal components (".." or absolute
+        # roots). If the input is traversal-tainted, fall back to the neutral stem
+        # "document" rather than trusting the stem derived from the attack path.
+        has_traversal = ".." in original.parts or original.is_absolute()
+        raw_stem = "document" if has_traversal else original.stem[:30].replace(" ", "_")
         name_part = self._safe_storage_component(
-            original.stem[:30].replace(" ", "_"),
+            raw_stem,
             fallback="document",
         )
         category_part = self._safe_storage_component(category, fallback="uncategorized")
@@ -224,8 +229,13 @@ class StorageManager:
         ext = original.suffix.lower()
         if not re.fullmatch(r"\.[A-Za-z0-9]{1,10}", ext):
             ext = ""
+        # Security: reject any path that contains traversal components (".." or absolute
+        # roots). If the input is traversal-tainted, fall back to the neutral stem
+        # "document" rather than trusting the stem derived from the attack path.
+        has_traversal = ".." in original.parts or original.is_absolute()
+        raw_stem = "document" if has_traversal else original.stem[:30].replace(" ", "_")
         name_part = LocalStorageManager._safe_storage_component(
-            original.stem[:30].replace(" ", "_"),
+            raw_stem,
             fallback="document",
         )
         category_part = LocalStorageManager._safe_storage_component(

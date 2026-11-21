@@ -39,6 +39,10 @@ os.environ.update({
     "SUPABASE_PUBLISHABLE_KEY": "",
     "BOOTSTRAP_ADMIN_PASSWORD": "",
     "CORS_ORIGINS": "http://localhost:3000,http://localhost:5173,http://localhost:8000",
+    # Disable encryption in tests: EncryptionManager must pass data through when no key is set.
+    # Without this, load_dotenv() picks up ENCRYPTION_KEY from backend/.env and encrypts data.
+    "ENCRYPTION_KEY": "",
+    "ENCRYPTION_KEYS": "",
 })
 
 # Add the project root to the Python path

@@ -42,7 +42,7 @@ keyword_mapping:
     sensitive: false
   identity:
     keywords: ["nrc", "national id", "passport", "national registration card", "မှတ်ပုံတင်", "နိုင်ငံကူး"]
-    category: "Identity"
+    category: "NRC"
     confidence_boost: 0.30
     sensitive: true
   customs:
@@ -52,7 +52,7 @@ keyword_mapping:
     sensitive: false
   shipping:
     keywords: ["bill of lading", "b/l", "bl", "container", "vessel", "shipment", "waybill", "awb"]
-    category: "Shipping"
+    category: "BL"
     confidence_boost: 0.25
     sensitive: false
   finance:
@@ -60,3 +60,12 @@ keyword_mapping:
     category: "Finance"
     confidence_boost: 0.25
     sensitive: true
+
+folder_mapping:
+  Invoices: "Invoices"
+  Contracts: "Contracts"
+  Licenses: "Licenses"
+  NRC: "Identity"
+  Customs: "Customs"
+  BL: "Shipping"
+  Finance: "Finance"

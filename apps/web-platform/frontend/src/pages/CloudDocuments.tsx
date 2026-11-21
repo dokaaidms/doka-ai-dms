@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+﻿import { useEffect, useMemo, useState } from 'react';
 import {
   AlertCircle, ArrowDownToLine, CheckCircle2, CloudUpload, Eye, File, History,
   Files, FolderInput, HardDrive, Pencil, RefreshCw, RotateCcw,
@@ -580,7 +580,7 @@ export default function CloudDocuments() {
           <CardContent className="space-y-4 p-5 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="font-bold text-white">Batch Upload Queue</h2>
+                <h2 className="font-bold text-white">Batch upload queue</h2>
                 <p className="mt-1 text-xs text-slate-400">Sequential multi-document ingestion with SHA-256 hash computation.</p>
               </div>
               <Badge variant="outline" className="border-slate-700 text-slate-400 font-mono text-[11px]">
@@ -590,7 +590,7 @@ export default function CloudDocuments() {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
               <input aria-label="Choose multiple files for batch upload" type="file" multiple onChange={event => { queueBatchFiles(event.target.files); event.target.value = ''; }} disabled={busy} className="min-w-0 flex-1 text-sm text-slate-300 file:mr-3 file:rounded-lg file:border-0 file:bg-slate-800 file:px-3 file:py-2 file:text-xs file:text-slate-200" />
               <Button onClick={() => void processBatch()} disabled={busy || !batchQueue.some(item => item.status === 'queued' || item.status === 'failed')} className="bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl">Upload Queue</Button>
-              <Button variant="outline" onClick={retryFailedBatch} disabled={busy || !batchQueue.some(item => item.status === 'failed')} className="border-slate-700 bg-slate-900 text-slate-300 hover:text-white rounded-xl">Retry Failed</Button>
+              <Button variant="outline" onClick={retryFailedBatch} disabled={busy || !batchQueue.some(item => item.status === 'failed')} className="border-slate-700 bg-slate-900 text-slate-300 hover:text-white rounded-xl">Retry failed</Button>
             </div>
             {batchQueue.length > 0 && (
               <div className="divide-y divide-slate-800 rounded-xl border border-slate-800">
@@ -777,7 +777,7 @@ export default function CloudDocuments() {
           <div className="max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-slate-800 bg-[#0E1420] p-6 shadow-2xl">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h2 id="doka-version-dialog-title" className="text-lg font-bold text-white">Version History</h2>
+                <h2 id="doka-version-dialog-title" className="text-lg font-bold text-white">Version history</h2>
                 <p className="mt-1 break-all text-sm text-slate-400">{versionsDocument.filename}</p>
               </div>
               <Button size="icon" variant="ghost" onClick={() => { setVersionsDocument(null); setVersions([]); setVersionFile(null); }} aria-label="Close version history" className="text-slate-400 hover:text-white">
@@ -789,7 +789,7 @@ export default function CloudDocuments() {
               <p className="mt-1 text-xs text-slate-400">The current file is retained as an immutable previous version.</p>
               <div className="mt-3 flex flex-col gap-2 sm:flex-row">
                 <input type="file" onChange={event => setVersionFile(event.target.files?.[0] || null)} disabled={busy} className="min-w-0 flex-1 text-sm text-slate-300 file:mr-3 file:rounded-lg file:border-0 file:bg-slate-800 file:px-3 file:py-2 file:text-xs file:text-slate-200" />
-                <Button onClick={() => void saveVersion()} disabled={busy || !versionFile} className="bg-emerald-600 hover:bg-emerald-500 text-white">Save Revision</Button>
+                <Button onClick={() => void saveVersion()} disabled={busy || !versionFile} className="bg-emerald-600 hover:bg-emerald-500 text-white">Save new version</Button>
               </div>
             </div>
             <div className="mt-5">
@@ -806,7 +806,7 @@ export default function CloudDocuments() {
                         <p className="text-sm font-semibold text-slate-100">Version {version.version_no} · {version.filename || versionsDocument.filename}</p>
                         <p className="mt-1 text-xs text-slate-400">{formatSize(version.size_bytes)} · {formatDate(version.created_at)} · <span className="font-mono text-emerald-400">SHA-256 {version.sha256.slice(0, 12)}…</span></p>
                       </div>
-                      <Button size="sm" variant="outline" onClick={() => void restoreVersion(version)} disabled={busy} className="border-slate-700 bg-slate-900 text-slate-200 hover:text-white">Restore</Button>
+                      <Button size="sm" variant="outline" onClick={() => void restoreVersion(version)} disabled={busy} className="border-slate-700 bg-slate-900 text-slate-200 hover:text-white">Restore this version</Button>
                     </div>
                   ))}
                 </div>

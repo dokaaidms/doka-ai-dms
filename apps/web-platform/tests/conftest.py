@@ -2,6 +2,15 @@ import os
 import sys
 from pathlib import Path
 
+# ---------------------------------------------------------------------------
+# Test-environment sentinel — must be set BEFORE any app module is imported.
+# Without these, apps that check ENVIRONMENT=production enforce strict rules
+# (e.g. TRUSTED_HOSTS must be an explicit allowlist) that break test collection.
+# ---------------------------------------------------------------------------
+os.environ.setdefault('ENVIRONMENT', 'test')
+os.environ.setdefault('TRUSTED_HOSTS', 'localhost,127.0.0.1,testserver')
+os.environ.setdefault('SECRET_KEY', 'doka-test-secret-key-with-more-than-32-bytes')
+
 # Add cloudflare_worker helper directory to sys.path so tests can import worker modules
 _worker_dir = Path(__file__).resolve().parent.parent / 'backend' / 'cloudflare_worker'
 if str(_worker_dir) not in sys.path:
