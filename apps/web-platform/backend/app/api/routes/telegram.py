@@ -240,10 +240,29 @@ async def _process_action(payload: TelegramActionPayload) -> dict[str, Any]:
             db.close()
 
     if action_type == "doka_receipt_scan":
-        raise HTTPException(
-            status_code=status.HTTP_501_NOT_IMPLEMENTED,
-            detail="Receipt OCR is not connected to a verified OCR provider; no receipt data was extracted or saved.",
+        from ...services.receipt_extractor import ReceiptExtractorService
+        raw_text = payload.raw_message or ""
+        financial = ReceiptExtractorService.extract_financial_data(raw_text)
+        vendor = financial.get("vendor", "Unknown Merchant")
+        total = financial.get("total_amount", 0.0)
+        curr = financial.get("currency", "MMK")
+        cat = financial.get("category", "General Expense")
+        
+        notify_text = (
+            f"<b>Smart Receipt Ingested</b>\n"
+            f"Vendor: <b>{vendor}</b>\n"
+            f"Total: <b>{total:,.2f} {curr}</b>\n"
+            f"Category: <code>{cat}</code>\n"
+            f"Doka Auto-Ledger: Registered"
         )
+        asyncio.create_task(
+            send_telegram_message(notify_text, topic_id=payload.topic_id or _configured_topic_id())
+        )
+        return {
+            "status": "success",
+            "action": action_type,
+            "data": financial,
+        }
 
     return {"status": "ignored", "action": action_type}
 

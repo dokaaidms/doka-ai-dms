@@ -9,6 +9,7 @@ import AdminLayout from '@/layouts/AdminLayout';
 import PersonalDashboard from '@/pages/PersonalDashboard';
 import WorkspaceReview from '@/pages/WorkspaceReview';
 import CloudDocuments from '@/pages/CloudDocuments';
+import SmartIngest from '@/pages/SmartIngest';
 import CloudAudit from '@/pages/CloudAudit';
 import AiUsage from '@/pages/AiUsage';
 import TemplatesPage from '@/pages/admin/Templates';
@@ -74,6 +75,7 @@ export default function App() {
           <Route path="dashboard" element={<PersonalDashboard />} />
           <Route path="workspace" element={<WorkspaceReview />} />
           <Route path="cloud-documents" element={<CloudDocuments />} />
+          <Route path="smart-ingest" element={<SmartIngest />} />
           <Route path="activity" element={<CloudAudit />} />
           <Route path="usage" element={<AiUsage />} />
           <Route path="templates" element={<TemplatesPage />} />

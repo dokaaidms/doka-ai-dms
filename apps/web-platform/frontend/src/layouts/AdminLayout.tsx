@@ -8,6 +8,7 @@ import {
   History,
   LayoutDashboard,
   LogOut,
+  Receipt,
   Shield,
   ShieldCheck,
   Settings,
@@ -41,6 +42,7 @@ import { isLocalAuthEnabled, signOutLocal } from '@/lib/localAuth';
 const workspaceItems = [
   { title: 'Overview', description: 'Your workspace', url: '/admin/dashboard', icon: LayoutDashboard },
   { title: 'Documents', description: 'Files and folders', url: '/admin/cloud-documents', icon: Cloud },
+  { title: 'Smart Ingest', description: 'Receipts & PII Privacy', url: '/admin/smart-ingest', icon: Receipt },
   { title: 'Activity', description: 'Security and history', url: '/admin/activity', icon: Activity },
   { title: 'AI Usage', description: 'Models and quota health', url: '/admin/usage', icon: Cpu },
   { title: 'Safe Workspace', description: 'On-device tools', url: '/admin/workspace', icon: FolderKanban },

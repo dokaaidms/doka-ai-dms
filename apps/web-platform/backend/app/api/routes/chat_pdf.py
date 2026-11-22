@@ -44,17 +44,23 @@ class ChatResponse(BaseModel):
 # ---------------------------------------------------------------------------
 
 def _extract_pdf_text(file_path: str, max_chars: int = 6000) -> str:
-    """Extract plain text from a PDF file using PyMuPDF (fitz)."""
+    """Extract plain text with page citations from a PDF file using PyMuPDF (fitz)."""
     try:
         import fitz  # PyMuPDF
         doc = fitz.open(file_path)
-        text = ""
-        for page in doc:
-            text += page.get_text()
-            if len(text) > max_chars:
+        chunks = []
+        total_len = 0
+        for page_idx, page in enumerate(doc, start=1):
+            page_text = page.get_text().strip()
+            if not page_text:
+                continue
+            entry = f"[Page {page_idx}]\n{page_text}"
+            chunks.append(entry)
+            total_len += len(entry)
+            if total_len > max_chars:
                 break
         doc.close()
-        return text[:max_chars]
+        return "\n\n".join(chunks)[:max_chars]
     except ImportError:
         log.warning("PyMuPDF not installed — run: pip install pymupdf")
         return ""
