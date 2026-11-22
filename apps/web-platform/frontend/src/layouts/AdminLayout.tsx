@@ -18,6 +18,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { DokaLogo } from '@/components/DokaLogo';
+import { NexusAppSwitcher } from '@/components/NexusAppSwitcher';
 import {
   Sidebar,
   SidebarContent,
@@ -238,6 +239,7 @@ export default function AdminLayout() {
             <span className="hidden h-9 items-center gap-2 rounded-xl border border-emerald-500/20 bg-emerald-950/30 px-3 text-[11px] font-semibold text-emerald-400 xl:inline-flex">
               <ShieldCheck className="h-3.5 w-3.5" /> Private workspace
             </span>
+            <NexusAppSwitcher currentAppId="doka" />
             <ThemeToggle />
           </div>
         </header>
