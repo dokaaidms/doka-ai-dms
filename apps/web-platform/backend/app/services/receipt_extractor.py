@@ -213,17 +213,18 @@ class ReceiptExtractorService:
     def _extract_line_items(cls, lines: list[str]) -> list[dict[str, Any]]:
         """Identify itemized product/service lines."""
         items = []
-        item_regex = re.compile(r"^(.+?)\s+(\d+)\s+([0-9,]+(?:\.\d{2})?)$")
+        price_regex = re.compile(r"^[0-9,]+(?:\.\d{2})?$")
         for line in lines:
-            m = item_regex.match(line)
-            if m:
-                desc, qty, price = m.groups()
-                try:
-                    items.append({
-                        "description": desc.strip(),
-                        "quantity": int(qty),
-                        "unit_price": float(price.replace(",", "")),
-                    })
-                except ValueError:
-                    continue
+            parts = line.strip().rsplit(None, 2)
+            if len(parts) == 3:
+                desc, qty, price = parts
+                if qty.isdigit() and price_regex.match(price):
+                    try:
+                        items.append({
+                            "description": desc.strip(),
+                            "quantity": int(qty),
+                            "unit_price": float(price.replace(",", "")),
+                        })
+                    except ValueError:
+                        continue
         return items[:20]  # Cap at top 20 items
