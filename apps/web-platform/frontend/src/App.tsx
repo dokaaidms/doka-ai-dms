@@ -36,16 +36,17 @@ export default function App() {
 
     async function restoreAuth() {
       try {
-        const currentUser = isLocalAuthEnabled()
-          ? await getLocalCurrentUser()
-          : (isSupabaseConfigured() ? await getCurrentUser() : null);
+        const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 2500));
+        const authPromise = isLocalAuthEnabled()
+          ? getLocalCurrentUser()
+          : (isSupabaseConfigured() ? getCurrentUser() : Promise.resolve(null));
+        const currentUser = await Promise.race([authPromise, timeoutPromise]);
         if (mounted) {
           setUser(currentUser ?? null);
           setLoading(false);
         }
       } catch {
         if (mounted) {
-          // Auth failed — do NOT grant any fallback access, redirect to login
           setUser(null);
           setLoading(false);
         }

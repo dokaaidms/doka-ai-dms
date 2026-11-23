@@ -8,11 +8,15 @@ import { initSentry } from './lib/sentry'
 import { inject as injectAnalytics } from '@vercel/analytics'
 import { injectSpeedInsights } from '@vercel/speed-insights'
 
-initSentry()
+try {
+  initSentry()
+} catch {}
 
-// Vercel Analytics + Speed Insights
-injectAnalytics()
-injectSpeedInsights()
+// Vercel Analytics + Speed Insights (safe initialization)
+try {
+  injectAnalytics()
+  injectSpeedInsights()
+} catch {}
 
 // Register Service Worker for PWA
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
