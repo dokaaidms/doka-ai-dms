@@ -108,7 +108,7 @@ def test_receipt_scan_fails_closed_without_verified_ocr(client):
         assert response.json()["status"] == "success"
     else:
         assert "verified OCR provider" in response.json()["detail"]
-    telegram.send_telegram_message.assert_not_awaited()
+        telegram.send_telegram_message.assert_not_awaited()
 
 
 def test_telegram_webhook_fails_closed_when_secret_is_not_configured(client, monkeypatch):

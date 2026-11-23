@@ -1,0 +1,12 @@
+[allowlist]
+description = "Ignore historical initial commit and archived legacy documentation false positives"
+commits = [
+  "35764adcc6daaf6e1ab5ef33633da4510c70d6a5",
+  "4aae0a25117f0336b0e341adf9d3a8cdebe53f41",
+  "354260800ac497691ff10f88d975c3f8b223c70a",
+  "a4352f1953e1207ec4af4545b08ab1aa745e5db7"
+]
+paths = [
+  '''docs/legacy/root/''',
+  '''archive/legacy/'''
+]
