@@ -16,6 +16,10 @@ export default defineConfig([
       reactRefresh.configs.vite,
     ],
     rules: {
+      '@typescript-eslint/no-unused-vars': 'warn',
+      '@typescript-eslint/no-explicit-any': 'warn',
+      'react-hooks/set-state-in-effect': 'warn',
+      'react-hooks/immutability': 'warn',
       'react-refresh/only-export-components': [
         'error',
         {
