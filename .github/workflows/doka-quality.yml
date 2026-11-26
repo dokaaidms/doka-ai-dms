@@ -71,7 +71,7 @@ jobs:
         run: python scripts/audit/doka_self_audit.py --output "$RUNNER_TEMP/doka-self-audit.json"
       - name: Upload self-audit report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: doka-self-audit-report
           path: ${{ runner.temp }}/doka-self-audit.json
@@ -97,7 +97,7 @@ jobs:
             git --log-opts="--all" --redact --report-format sarif --report-path /report/gitleaks.sarif --no-banner --exit-code 1 /repo
       - name: Upload redacted secret scan findings
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: gitleaks-redacted-report
           path: ${{ runner.temp }}/gitleaks.sarif
@@ -157,7 +157,7 @@ jobs:
           PY
       - name: Upload backend dependency audit reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: backend-dependency-audit
           path: |
@@ -296,7 +296,7 @@ jobs:
         run: python ../../../scripts/export_cloud_openapi.py artifacts/cloud-openapi.json
       - name: Upload backend coverage and OpenAPI artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: backend-coverage-and-openapi
           path: |
@@ -428,7 +428,7 @@ jobs:
         run: npm test
       - name: Upload dependency and lint reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frontend-security-remediation-candidate
           path: |
@@ -457,7 +457,7 @@ jobs:
           pipx run semgrep scan --config auto --sarif --output semgrep.sarif .
       - name: Upload Semgrep baseline
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: semgrep-baseline
           path: semgrep.sarif
